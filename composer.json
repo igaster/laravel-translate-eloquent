@@ -1,0 +1,23 @@
+{
+    "name": "igaster/laravel-translate-eloquent",
+	"description": "Translate any column in your Database in Laravel models",
+    "keywords": ["translation", "localization", "translate-model", "translate-database", "laravel-5.x", "package", "trait"],
+    "license": "MIT",
+    "homepage": "https://github.com/igaster/laravel-translate-eloquent.git",
+    "authors": [
+        {
+            "name": "Giannis Gasteratos",
+            "email": "igasteratos@gmail.com"
+        }
+    ],	
+    "require": {
+        "php": ">=5.4.0",
+        "illuminate/support": "5.*"
+    },
+    "autoload": {
+        "psr-4" : {
+            "igaster\\TranslateEloquent\\" : "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}
