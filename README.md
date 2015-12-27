@@ -82,9 +82,9 @@ $model->_day->set([                 // Set all translations
     'el' => 'Δευτέρα',
     'en' => 'Monday',
     'de' => 'Montag',
+]);
 
 $model->save();                     // Don't forget to save your model to save the relationship
-]);
 ```
 When you set a value for a translation then an entry in the the `translations` table will be created / updated.
 
