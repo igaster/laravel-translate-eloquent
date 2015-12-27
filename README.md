@@ -3,7 +3,7 @@
 [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://tldrlegal.com/license/mit-license)
 [![Downloads](https://img.shields.io/packagist/dt/igaster/laravel-translate-eloquent.svg?style=flat-square)](https://packagist.org/packages/igaster/laravel-translate-eloquent)
 
-Translate any column in your Database in Laravel models
+Translate any column in your Database in Laravel models. You need only one additional table to strore translations for all your models.
 
 ## Installation
 
@@ -19,15 +19,23 @@ and install with `composer update`
 
 ### Step 1: Create Translation Table:
 
-Create a new migration with `artisan make:migration translations` and create the following table in the `up()` method:
+Create a new migration with `artisan make:migration translations` and create the following table:
 
 ```php
-    Schema::create('translations', function (Blueprint $table) {
-        $table->increments('id');
-        $table->string('group_id');
-        $table->string('value');
-        $table->string('locale', 2); // Can be any lenght!
-    });
+    public function up()
+    {
+        Schema::create('translations', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('group_id');
+            $table->string('value');
+            $table->string('locale', 2); // Can be any lenght!
+        });
+    }
+
+    public function down()
+    {
+        Schema::drop('translations');
+    }
 ```
 
 migrate the database: `php artisan migrate`
@@ -58,27 +66,28 @@ To get a translated value simpy access the model key without the underscore. The
 Get Translations:
 
 ```php
-$model->key;   // get the translated value of key for the current Locale
-$model->_key;  // get instance of igaster\TranslateEloquent\Translations
+$model->key;            // get the translated value of key for the current Locale
 $model->_key->in('de'); // request a translation in a different locale
+$model->_key;           // get instance of igaster\TranslateEloquent\Translations
 ```
 
 Set Translations:
 
 ```php
-App::setLocale('de');
-$model->day='Montag';  // set the translation for current Locale. 
-                       // It will create/update an entry to the `translations` table. 
-$model->save();        // Don't forget to save your model to save the relationship
+$model->day='Montag';               // set the translation for current Locale.  
 
-$model->_day->set('en', 'Monday');	// Set a translation for a given locale
+$model->_day->set('en', 'Monday');  // Set a translation for a given locale
 
 $model->_day->set([                 // Set all translations
-	'el' => 'Δευτέρα',
-	'en' => 'Monday',
-	'de' => 'Montag',
+    'el' => 'Δευτέρα',
+    'en' => 'Monday',
+    'de' => 'Montag',
+
+$model->save();                     // Don't forget to save your model to save the relationship
 ]);
 ```
+When you set a value for a translation then an entry in the the `translations` table will be created / updated.
+
 
 A short refreshment in Laravel locale functions (Locale is defined in `app.php` configuration file):
 ```php
@@ -86,7 +95,6 @@ App::setLocale('de');                    // Set curent Locale
 App::getLocale();                        // Get curent Locale
 Config::set('app.fallback_locale','el'); // Set fallback Locale
 ```
-
 
 ## Handle Conflicts:
 
