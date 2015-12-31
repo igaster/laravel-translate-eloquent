@@ -1,0 +1,14 @@
+language: php
+
+php:
+  - 5.5
+  - hhvm
+
+sudo: false
+
+before_script:
+  - composer self-update
+
+install: travis_retry composer install --no-interaction --prefer-source
+
+script: vendor/bin/phpunit --verbose

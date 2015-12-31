@@ -4,24 +4,83 @@ use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
-use igaster\TranslateModel\Translatable;
-use igaster\TranslateModel\Translations;
-use igaster\TranslateModel\Translation;
-use igaster\TranslateModel\Exceptions\KeyNotTranslatable;
-use igaster\TranslateModel\Exceptions\TranslationNotFound;
+use Illuminate\Database\Capsule\Manager as DB;
+use Illuminate\Database\Eloquent\Model as Eloquent;
+use Orchestra\Testbench\TestCase;
 
-// Replace 'User' with a model that has a translatable '_key'
+use igaster\TranslateEloquent\Translatable;
+use igaster\TranslateEloquent\Translations;
+use igaster\TranslateEloquent\Translation;
+use igaster\TranslateEloquent\Exceptions\KeyNotTranslatable;
+use igaster\TranslateEloquent\Exceptions\TranslationNotFound;
+
+use igaster\TranslateModel\Test\Models\Day;
+
 class TranslatableTest extends TestCase
 {
-    use DatabaseTransactions;
+    // use DatabaseTransactions;
+
+    // -----------------------------------------------
+    //  Load .env Environment Variables
+    // -----------------------------------------------
+
+    public static function setUpBeforeClass()
+    {
+        if (file_exists(__DIR__.'/../.env')) {
+            $dotenv = new Dotenv\Dotenv(__DIR__.'/../');
+            $dotenv->load();
+        }
+    }
+
+    // -----------------------------------------------
+    //  Setup Database
+    // -----------------------------------------------
+
+    protected $db;
+    public function setUp()
+    {
+        parent::setUp();
+
+        Eloquent::unguard();
+        $db = new DB;
+        $db->addConnection([
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+        ]);
+        $db->bootEloquent();
+        $db->setAsGlobal();
+        $this->db=$db;
+
+        // -- Set  migrations
+        $db->schema()->create('translations', function ($table) {
+            $table->increments('id');
+            $table->string('group_id');
+            $table->string('value');
+            $table->string('locale', 2); // Can be any lenght!
+        });
+
+        $db->schema()->create('days', function ($table) {
+            $table->increments('id');
+            $table->integer('_name')->unsigned()->nullable();
+            $table->boolean('weekend')->default(false);
+            $table->timestamps();
+        });
+    }
+
+    public function tearDown() {
+        $this->db->schema()->drop('days');
+        $this->db->schema()->drop('translations');
+    }
+
+    // -----------------------------------------------
 
     private function getNewModel(){
-        $model = factory(User::class)->create();
+        $model = Day::create();
         return $this->reloadModel($model);
     }
 
     private function reloadModel($model){
-        return User::find($model->id);
+        return Day::find($model->id);
     }
 
     private function set_locale($locale, $fallback_locale){
@@ -57,16 +116,16 @@ class TranslatableTest extends TestCase
 
     public function test_trait() {
         $model = $this->getNewModel();
-        $this->assertEquals($model->isTranslatable('key'), true);
-        $this->assertEquals($model->isTranslatable('name'), false);
+        $this->assertEquals($model->isTranslatable('name'), true);
+        $this->assertEquals($model->isTranslatable('weekend'), false);
         $this->assertEquals($model->isTranslatable('invalid'), false);
-        $this->assertEquals($model->isTranslation('_key'), true);
-        $this->assertEquals($model->isTranslation('name'), false);
+        $this->assertEquals($model->isTranslation('_name'), true);
+        $this->assertEquals($model->isTranslation('weekend'), false);
         $this->assertEquals($model->isTranslation('_invalid'), false);
 
-        $this->assertInstanceOf(Translations::class, $model->getTranslations('key'));
+        $this->assertInstanceOf(Translations::class, $model->getTranslations('name'));
         
-        $this->assertEquals(isset($model->key), true);
+        $this->assertEquals(isset($model->name), true);
 
         $this->setExpectedException(KeyNotTranslatable::class);
         $model->getTranslationId('invalid');
@@ -77,25 +136,25 @@ class TranslatableTest extends TestCase
         
         // Create
         App::setLocale('el');
-        $model->key = 'Τρίτη';
+        $model->name = 'Τρίτη';
         $model->save();
         $this->reloadModel($model);
-        $this->assertEquals($model->key, 'Τρίτη');
+        $this->assertEquals($model->name, 'Τρίτη');
         
         // Update
-        $model->key = 'Τετάρτη';
-        $this->assertEquals($model->key, 'Τετάρτη');
+        $model->name = 'Τετάρτη';
+        $this->assertEquals($model->name, 'Τετάρτη');
         
         // 2nd locale
         App::setLocale('en');
-        $model->key = 'Wednesday';
-        $this->assertEquals($model->key, 'Wednesday');
+        $model->name = 'Wednesday';
+        $this->assertEquals($model->name, 'Wednesday');
     }    
 
     public function test_set_array_format(){
         $model = $this->getNewModel();
 
-        $model->_key->set([
+        $model->_name->set([
             'el' => 'Ένα',
             'en' => 'One',
         ]);
@@ -103,17 +162,17 @@ class TranslatableTest extends TestCase
         $model->save();
         $this->reloadModel($model);
 
-        $this->assertEquals($model->_key->in('el'), 'Ένα');
-        $this->assertEquals($model->_key->in('en'), 'One');
+        $this->assertEquals($model->_name->in('el'), 'Ένα');
+        $this->assertEquals($model->_name->in('en'), 'One');
     }
 
 
     public function test_get_translations() {
         $model = $this->getNewModel();
 
-        $this->assertInstanceOf(Translations::class,$model->_key);
+        $this->assertInstanceOf(Translations::class,$model->_name);
 
-        $model->_key->set([
+        $model->_name->set([
             'el' => 'Δευτέρα',
             'en' => 'Monday',
         ]);
@@ -121,18 +180,18 @@ class TranslatableTest extends TestCase
         $model->save();
         $this->reloadModel($model);
 
-        $this->assertInstanceOf(Translations::class,$model->_key);
-        $this->assertInstanceOf(Translation::class, $model->_key->get('el'));
+        $this->assertInstanceOf(Translations::class,$model->_name);
+        $this->assertInstanceOf(Translation::class, $model->_name->get('el'));
 
-        $this->assertEquals($model->_key->in('el'), 'Δευτέρα');
-        $this->assertEquals($model->_key->in('en'), 'Monday');
-        $this->assertEquals($model->_key->in('invalid', 'el'), 'Δευτέρα');
+        $this->assertEquals($model->_name->in('el'), 'Δευτέρα');
+        $this->assertEquals($model->_name->in('en'), 'Monday');
+        $this->assertEquals($model->_name->in('invalid', 'el'), 'Δευτέρα');
 
         App::setLocale('el');
-        $this->assertEquals($model->key, 'Δευτέρα');
+        $this->assertEquals($model->name, 'Δευτέρα');
 
         $this->setExpectedException(TranslationNotFound::class);
-        $model->_key->in('invalid');
+        $model->_name->in('invalid');
     }
 
     public function test_get_key_array_access() {
@@ -140,30 +199,30 @@ class TranslatableTest extends TestCase
         App::setLocale('el');
 
         // get
-        $model->key= 'Δευτέρα';
-        $this->assertEquals($model['key'], 'Δευτέρα');
+        $model->name= 'Δευτέρα';
+        $this->assertEquals($model['name'], 'Δευτέρα');
 
         // set 
-        $model['key']= 'Τρίτη';
-        $this->assertEquals($model->key, 'Τρίτη');
+        $model['name']= 'Τρίτη';
+        $this->assertEquals($model->name, 'Τρίτη');
     }
 
     public function test_fallback_locale(){
         $model = $this->getNewModel();
 
-        $model->_key->set([
+        $model->_name->set([
             'el' => 'Κυριακή',
             'en' => 'Sunday',
         ]);
 
         $this->set_locale('el','en');
-        $this->assertEquals($model->key, 'Κυριακή');
+        $this->assertEquals($model->name, 'Κυριακή');
 
         $this->set_locale('de', 'en');
-        $this->assertEquals($model->key, 'Sunday');
+        $this->assertEquals($model->name, 'Sunday');
 
-        $this->assertEquals($model->_key->in('invalid','el'), 'Κυριακή');
-        $this->assertEquals($model->_key->in('el','invalid'), 'Κυριακή');
+        $this->assertEquals($model->_name->in('invalid','el'), 'Κυριακή');
+        $this->assertEquals($model->_name->in('el','invalid'), 'Κυριακή');
     }
 
 }
