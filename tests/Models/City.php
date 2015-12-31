@@ -2,13 +2,11 @@
 
 use Illuminate\Database\Eloquent\Model as Eloquent;
 
-class Day extends Eloquent
+class City extends Eloquent
 {
     use \igaster\TranslateEloquent\TranslationTrait;
 
-    protected $table = 'days';
+    protected $table = 'cities';
 
-    // protected $translatable = ['name'];
-
-    // protected $fillable = ['key'];
+    protected $translatable = ['name'];
 }
