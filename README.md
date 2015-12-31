@@ -45,11 +45,11 @@ migrate the database: `php artisan migrate`
 
 ### Step 2: Add translatable keys to you models
 
-By default any key that starts with underscore will be translatable. They should be integer. (Actually they are foreign key to the translatable.group_id). This is an example migration that will create a translatable key:
+In your migrations define any number of integer keys that you want to hold translations. (Actually they are foreign key to the translatable.group_id). This is an example migration that will create a translatable key:
 
 
 ```php
-    $table->integer('_key')->unsigned()->nullable();
+    $table->integer('key')->unsigned()->nullable();
 ```
 
 ### Step 3: Apply the Trait:
@@ -58,6 +58,11 @@ Apply the `TranslationTrait` trait to any model that you want to have translatab
 
 ```php
     use igaster\TranslateEloquent\TranslationTrait;
+```
+now simply set the `$translatable` array in your model with the name of the keys that should be trasnlatable:
+
+```php
+    protected $translatable = ['name'];
 ```
 
 Now you are ready to use translated keys!
@@ -142,5 +147,5 @@ public function __set($key, $value) {
 
 * Cascade delete model + translations
 * Handle untranslated values (throwing Exception is brute force!)
-* Allow manually selecting translated keys (rather than using underscore) - should be optional
+* Implement Model::create() & Model::update functions
 * any ideas? Send me a request...

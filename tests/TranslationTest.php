@@ -12,7 +12,7 @@ use igaster\TranslateEloquent\Exceptions\TranslationNotFound;
 
 use igaster\TranslateEloquent\Test\Models\Day;
 
-class DatabaseTest extends TestCase
+class TranslationTest extends TestCase
 {
     // -----------------------------------------------
     //  Load .env Environment Variables
@@ -55,7 +55,7 @@ class DatabaseTest extends TestCase
 
         $db->schema()->create('days', function ($table) {
             $table->increments('id');
-            $table->integer('_name')->unsigned()->nullable();
+            $table->integer('name')->unsigned()->nullable();
             $table->boolean('weekend')->default(false);
             $table->timestamps();
         });
@@ -110,16 +110,23 @@ class DatabaseTest extends TestCase
 
     public function test_trait() {
         $model = $this->getNewModel();
-        $this->assertEquals($model->isTranslatable('name'), true);
-        $this->assertEquals($model->isTranslatable('weekend'), false);
-        $this->assertEquals($model->isTranslatable('invalid'), false);
-        $this->assertEquals($model->isTranslation('_name'), true);
-        $this->assertEquals($model->isTranslation('weekend'), false);
-        $this->assertEquals($model->isTranslation('_invalid'), false);
+        $this->assertEquals(true,  $model->isTranslatable('name'));
+        $this->assertEquals(false, $model->isTranslatable('weekend'));
+        $this->assertEquals(false, $model->isTranslatable('invalid'));
+        $this->assertEquals(true,  $model->isTranslation('_name'));
+        $this->assertEquals(false, $model->isTranslation('weekend'));
+        $this->assertEquals(false, $model->isTranslation('_invalid'));
+
+
+        $this->assertEquals('name', $model->getTranslationKey('_name'));
+        $this->assertEquals('name', $model->getTranslationKey('name'));
+
+        $this->assertNull($model->getTranslationId('name'));
 
         $this->assertInstanceOf(Translations::class, $model->getTranslations('name'));
         
         $this->assertEquals(isset($model->name), true);
+        $this->assertEquals(isset($model->_name), true);
 
         $this->setExpectedException(KeyNotTranslatable::class);
         $model->getTranslationId('invalid');
@@ -199,6 +206,26 @@ class DatabaseTest extends TestCase
         // set 
         $model['name']= 'Τρίτη';
         $this->assertEquals($model->name, 'Τρίτη');
+    }
+
+    public function test_new_model(){
+        $model = new Day();
+        $this->assertInstanceOf(Translations::class,$model->_name);
+
+        $model->name = 'Τρίτη';
+        $this->assertEquals($model->name, 'Τρίτη');
+        $model->save();
+        $model = $this->reloadModel($model);
+        $this->assertEquals($model->name, 'Τρίτη');
+    }
+
+    public function test_model_create(){
+        $model = Day::create([
+            'name' => 'Τετάρτη',
+            'weekend' => false,
+        ]);
+        $model = $this->reloadModel($model);
+        // $this->assertEquals($model->name, 'Τετάρτη');
     }
 
     public function test_fallback_locale(){
