@@ -46,12 +46,20 @@ trait TranslationTrait{
 
     //---------------[Locale Helpers]------------------
 
+    protected $locale = null;
+    protected $fallback_locale = null;
+    public function translate($locale, $fallback_locale = null){
+        $this->locale = $locale;
+        $this->fallback_locale = $fallback_locale;
+        return $this;
+    }
+
     protected function translation_locale(){
-        return \App::getLocale();
+        return $this->locale ?: \App::getLocale();
     }
 
     protected function translation_fallback(){
-        return \Config::get('app.fallback_locale');
+        return $this->fallback_locale ?: \Config::get('app.fallback_locale');
     }
 
     //-------------------------------------------------
@@ -70,7 +78,9 @@ trait TranslationTrait{
         if($this->isTranslatable($key)){
             $this->translatable_handled=true;
             $translations = $this->getTranslations($key);
-            return $translations->in($this->translation_locale(), $this->translation_fallback());
+            $result = $translations->in($this->translation_locale(), $this->translation_fallback());
+            $this->translate(null, null);
+            return $result;
         }
     }
 
@@ -81,6 +91,7 @@ trait TranslationTrait{
             $translations = $this->getTranslations($key);
             $translations->set($this->translation_locale(), $value);
             $this->attributes[$this->getTranslationKey($key)] = $translations->group_id;
+            $this->translate(null, null);
             $this->translatable_handled=true;
         }
     }

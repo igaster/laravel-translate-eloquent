@@ -219,13 +219,25 @@ class TranslationTest extends TestCase
         $this->assertEquals($model->name, 'Τρίτη');
     }
 
-    public function test_model_create(){
-        $model = Day::create([
-            'name' => 'Τετάρτη',
-            'weekend' => false,
+    public function test_translate_to_locale(){
+        $model = $this->getNewModel();
+        
+        $model->_name->set([
+            'el' => 'Ένα',
+            'en' => 'One',
+            'de' => 'Eins',
         ]);
-        $model = $this->reloadModel($model);
-        // $this->assertEquals($model->name, 'Τετάρτη');
+
+        $this->set_locale('en','de');
+        $this->assertEquals($model->translate('el')->name, 'Ένα');
+        $this->assertEquals($model->translate('it', 'el')->name, 'Ένα');
+        $this->assertEquals($model->name, 'One');
+
+        $model->translate('el')->name =  'Δύο';
+        $model->name='Two';
+        $this->assertEquals($model->_name->in('el'), 'Δύο');
+        $this->assertEquals($model->_name->in('en'), 'Two');
+
     }
 
     public function test_fallback_locale(){

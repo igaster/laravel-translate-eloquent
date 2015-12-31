@@ -62,7 +62,7 @@ Apply the `TranslationTrait` trait to any model that you want to have translatab
 now simply set the `$translatable` array in your model with the name of the keys that should be trasnlatable:
 
 ```php
-    protected $translatable = ['name'];
+    protected $translatable = ['key'];
 ```
 
 Now you are ready to use translated keys!
@@ -82,9 +82,9 @@ $model->_key;           // get instance of igaster\TranslateEloquent\Translation
 Set Translations:
 
 ```php
-$model->day='Montag';               // set the translation for current Locale.  
+$model->day='Monday';               // set the translation for current Locale.  
 
-$model->_day->set('en', 'Monday');  // Set a translation for a given locale
+$model->_day->set('el', 'Δευτέρα'); // Set a translation for a given locale
 
 $model->_day->set([                 // Set all translations
     'el' => 'Δευτέρα',
@@ -93,6 +93,12 @@ $model->_day->set([                 // Set all translations
 ]);
 
 $model->save();                     // Don't forget to save your model to save the relationship
+```
+
+on the fly translations:
+```php
+$model->translate('de')->key;           // Get Translation
+$model->translate('de')->key = 'Value'; // Set Translation
 ```
 When you set a value for a translation then an entry in the the `translations` table will be created / updated.
 
