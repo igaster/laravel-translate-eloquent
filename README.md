@@ -1,7 +1,10 @@
 ## Description
-[![Laravel](https://img.shields.io/badge/Laravel-5.x-orange.svg?style=flat-square)](http://laravel.com)
-[![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://tldrlegal.com/license/mit-license)
-[![Downloads](https://img.shields.io/packagist/dt/igaster/laravel-translate-eloquent.svg?style=flat-square)](https://packagist.org/packages/igaster/laravel-translate-eloquent)
+[![Laravel](https://img.shields.io/badge/Laravel-5.x-orange.svg)](http://laravel.com)
+[![License](http://img.shields.io/badge/license-MIT-brightgreen.svg)](https://tldrlegal.com/license/mit-license)
+[![Downloads](https://img.shields.io/packagist/dt/igaster/laravel-translate-eloquent.svg)](https://packagist.org/packages/igaster/laravel-translate-eloquent)
+[![Build Status](https://travis-ci.org/igaster/laravel-translate-eloquent.svg?branch=master)](https://travis-ci.org/igaster/laravel-translate-eloquent)
+
+
 
 Translate any column in your Database in Laravel models. You need only one additional table to strore translations for all your models.
 
