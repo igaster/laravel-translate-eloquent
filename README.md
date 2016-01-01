@@ -180,7 +180,7 @@ public function __set($key, $value) {
 } 
 ```
 
-1. boot()
+1. boot(), create(), update() methods
 
 This trait implements the `boot()` method to handle cascaded deletes of the translations. If you should implemeent `boot()` in your model then [rename the method](http://php.net/manual/en/language.oop5.traits.php) when you import the trait:
 
@@ -199,6 +199,8 @@ public static function boot()
     self::bootTranslations();
 }
 ```
+
+The same aproach can be followed if you need to override Eloquent's `create()` or `update()` methods, which are overriden in the Trait.
 
 ## Todo
 * ~~Cascade delete model + translations~~ Fixed
