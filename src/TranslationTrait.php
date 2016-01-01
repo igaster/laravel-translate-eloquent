@@ -151,4 +151,14 @@ trait TranslationTrait{
         $this->save();
         return $this;
     }
+
+    public static function boot()
+    {
+        self::deleting(function ($model) {
+            foreach (self::$translatable as $key) {
+                Translation::where('group_id',$model->attributes[$key])->delete();
+            }
+        });
+    }
+
 }

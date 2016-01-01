@@ -30,30 +30,30 @@ class TranslationTest extends TestCase
     //  Setup Database
     // -----------------------------------------------
 
-    protected $db;
+    protected $database;
     public function setUp()
     {
         parent::setUp();
 
         Eloquent::unguard();
-        $db = new DB;
-        $db->addConnection([
+        $database = new DB;
+        $database->addConnection([
             'driver' => 'sqlite',
             'database' => ':memory:',
         ]);
-        $db->bootEloquent();
-        $db->setAsGlobal();
-        $this->db=$db;
+        $database->bootEloquent();
+        $database->setAsGlobal();
+        $this->database=$database;
 
         // -- Set  migrations
-        $db->schema()->create('translations', function ($table) {
+        $database->schema()->create('translations', function ($table) {
             $table->increments('id');
             $table->string('group_id');
             $table->string('value');
             $table->string('locale', 2); // Can be any lenght!
         });
 
-        $db->schema()->create('days', function ($table) {
+        $database->schema()->create('days', function ($table) {
             $table->increments('id');
             $table->integer('name')->unsigned()->nullable();
             $table->boolean('weekend')->default(false);
@@ -62,8 +62,8 @@ class TranslationTest extends TestCase
     }
 
     public function tearDown() {
-        $this->db->schema()->drop('days');
-        $this->db->schema()->drop('translations');
+        $this->database->schema()->drop('days');
+        $this->database->schema()->drop('translations');
     }
 
     // -----------------------------------------------
@@ -214,6 +214,46 @@ class TranslationTest extends TestCase
         $this->assertEquals($model->name, 'Τρίτη');
     }
 
+
+    public function test_translate_to_locale(){
+        $model = $this->getNewModel();
+        
+        $model->translations('name')->set([
+            'el' => 'Ένα',
+            'en' => 'One',
+            'de' => 'Eins',
+        ]);
+
+        $this->set_locale('en','de');
+        $this->assertEquals($model->translate('el')->name, 'Ένα');
+        $this->assertEquals($model->translate('it', 'el')->name, 'Ένα');
+        $this->assertEquals($model->name, 'One');
+
+        $model->translate('el')->name =  'Δύο';
+        $model->name='Two';
+        $this->assertEquals($model->translations('name')->in('el'), 'Δύο');
+        $this->assertEquals($model->translations('name')->in('en'), 'Two');
+
+    }
+
+    public function test_fallback_locale(){
+        $model = $this->getNewModel();
+
+        $model->translations('name')->set([
+            'el' => 'Κυριακή',
+            'en' => 'Sunday',
+        ]);
+
+        $this->set_locale('el','en');
+        $this->assertEquals($model->name, 'Κυριακή');
+
+        $this->set_locale('de', 'en');
+        $this->assertEquals($model->name, 'Sunday');
+
+        $this->assertEquals($model->translations('name')->in('invalid','el'), 'Κυριακή');
+        $this->assertEquals($model->translations('name')->in('el','invalid'), 'Κυριακή');
+    }
+
     public function test_model_new(){
         $model = new Day();
         $this->assertInstanceOf(Translations::class,$model->translations('name'));
@@ -287,43 +327,54 @@ class TranslationTest extends TestCase
         $this->assertEquals($model->translate('el')->name, 'Πέμπτη');
     }
 
-    public function test_translate_to_locale(){
-        $model = $this->getNewModel();
-        
-        $model->translations('name')->set([
-            'el' => 'Ένα',
-            'en' => 'One',
-            'de' => 'Eins',
-        ]);
 
-        $this->set_locale('en','de');
-        $this->assertEquals($model->translate('el')->name, 'Ένα');
-        $this->assertEquals($model->translate('it', 'el')->name, 'Ένα');
-        $this->assertEquals($model->name, 'One');
+    protected function seeInDatabase($table, array $data, $connection = null)
+    {
+        $database = $this->database;
 
-        $model->translate('el')->name =  'Δύο';
-        $model->name='Two';
-        $this->assertEquals($model->translations('name')->in('el'), 'Δύο');
-        $this->assertEquals($model->translations('name')->in('en'), 'Two');
+        $count = $database->table($table)->where($data)->count();
 
+        $this->assertGreaterThan(0, $count, sprintf(
+            'Unable to find row in database table [%s] that matched attributes [%s].', $table, json_encode($data)
+        ));
+
+        return $this;
     }
 
-    public function test_fallback_locale(){
-        $model = $this->getNewModel();
+    protected function notSeeInDatabase($table, array $data, $connection = null)
+    {
+        $database = $this->database;
 
-        $model->translations('name')->set([
-            'el' => 'Κυριακή',
-            'en' => 'Sunday',
-        ]);
+        $count = $database->table($table)->where($data)->count();
 
-        $this->set_locale('el','en');
-        $this->assertEquals($model->name, 'Κυριακή');
+        $this->assertEquals(0, $count, sprintf(
+            'Found unexpected records in database table [%s] that matched attributes [%s].', $table, json_encode($data)
+        ));
 
-        $this->set_locale('de', 'en');
-        $this->assertEquals($model->name, 'Sunday');
-
-        $this->assertEquals($model->translations('name')->in('invalid','el'), 'Κυριακή');
-        $this->assertEquals($model->translations('name')->in('el','invalid'), 'Κυριακή');
+        return $this;
     }
 
+    public function test_model_delete(){
+        $model = Day::create([
+            'weekend' => false,
+            'name' => [
+                'el' => 'zzz-el',
+                'en' => 'zzz-en',
+            ]
+        ]);
+
+        $model = Day::create([
+            'weekend' => false,
+            'name' => [
+                'el' => 'xxx-el',
+                'en' => 'xxx-en',
+            ]
+        ]);
+        $this->seeInDatabase('translations', ['value' => 'xxx-el']);
+        $model->delete();
+        $this->notSeeInDatabase('days', ['id' => $model->id]);
+        $this->notSeeInDatabase('translations', ['value' => 'xxx-el']);
+        $this->notSeeInDatabase('translations', ['value' => 'xxx-en']);
+        $this->seeInDatabase('translations', ['value' => 'zzz-el']);
+    }
 }

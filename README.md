@@ -178,8 +178,7 @@ public function __set($key, $value) {
 } 
 ```
 
-## Todo (more)
-
-* Cascade delete model + translations
+## Todo
+* ~~Cascade delete model + translations~~ Fixed
 * Handle untranslated values (throwing Exception is brute force!)
 * any ideas? Send me a request...
