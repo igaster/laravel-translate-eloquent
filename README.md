@@ -54,15 +54,15 @@ In your migrations define any number of integer keys that you want to hold trans
 
 ### Step 3: Setup your model:
 
-Apply the `TranslationTrait` trait to any model that you want to have translatable keys:
+Apply the `TranslationTrait` trait to any model that you want to have translatable keys and add these keys into the `$translatable` array:
 
 ```php
-    use igaster\TranslateEloquent\TranslationTrait;
-```
-now simply set the `$translatable` array in your model with the name of the keys that should be trasnlatable:
+class ExampleModel extends Eloquent
+{
+    use \igaster\TranslateEloquent\TranslationTrait;
 
-```php
-    protected $translatable = ['key'];
+    protected static $translatable = ['key'];
+}
 ```
 
 Now you are ready to use translated keys!
@@ -120,10 +120,11 @@ App::getLocale();                        // Get curent Locale
 Config::set('app.fallback_locale','el'); // Set fallback Locale
 ```
 
-### You can achieve the same functionality with the `Translations` object.
+### Working with the `Translations` object
+
+You can achieve the same functionality with the `igaster\TranslateEloquent\Translations` object.
 
 ```php
-$translations = $model->_key;        // Get instance of igaster\TranslateEloquent\Translations
 $translations = $model->translations('key'); // instance of Translations collection
 
 $translations->in('de');             // Get a translation in a locale
