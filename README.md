@@ -141,7 +141,7 @@ $translations->set([                 // Set a batch of translations
 
 ## Handle Conflicts:
 
-1. __get() & __set()
+#### 1. __get() & __set()
 
 This Trait makes use of the `__get()` and `__set()` magic methods to perform its ... well... magic! However if you want to implement these functions in your model or another trait then php will complain about conflicts. To overcome this problem you have to hide the Traits methods when you import it:
 
@@ -180,7 +180,7 @@ public function __set($key, $value) {
 } 
 ```
 
-1. boot(), create(), update() methods
+#### 2. boot(), create(), update() methods
 
 This trait implements the `boot()` method to handle cascaded deletes of the translations. If you should implemeent `boot()` in your model then [rename the method](http://php.net/manual/en/language.oop5.traits.php) when you import the trait:
 
