@@ -8,7 +8,7 @@ class Day extends Eloquent
 
     protected $table = 'days';
 
-    protected $translatable = ['name'];
+    protected static $translatable = ['name'];
 
     // protected $fillable = ['key'];
 }

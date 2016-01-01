@@ -110,23 +110,15 @@ class TranslationTest extends TestCase
 
     public function test_trait() {
         $model = $this->getNewModel();
-        $this->assertEquals(true,  $model->isTranslatable('name'));
-        $this->assertEquals(false, $model->isTranslatable('weekend'));
-        $this->assertEquals(false, $model->isTranslatable('invalid'));
-        $this->assertEquals(true,  $model->isTranslation('_name'));
-        $this->assertEquals(false, $model->isTranslation('weekend'));
-        $this->assertEquals(false, $model->isTranslation('_invalid'));
-
-
-        $this->assertEquals('name', $model->getTranslationKey('_name'));
-        $this->assertEquals('name', $model->getTranslationKey('name'));
+        $this->assertEquals(true,  Day::isTranslatable('name'));
+        $this->assertEquals(false, Day::isTranslatable('weekend'));
+        $this->assertEquals(false, Day::isTranslatable('invalid'));
 
         $this->assertNull($model->getTranslationId('name'));
 
-        $this->assertInstanceOf(Translations::class, $model->getTranslations('name'));
+        $this->assertInstanceOf(Translations::class, $model->translations('name'));
         
         $this->assertEquals(isset($model->name), true);
-        $this->assertEquals(isset($model->_name), true);
 
         $this->setExpectedException(KeyNotTranslatable::class);
         $model->getTranslationId('invalid');
@@ -155,7 +147,7 @@ class TranslationTest extends TestCase
     public function test_set_array_format(){
         $model = $this->getNewModel();
 
-        $model->_name->set([
+        $model->translations('name')->set([
             'el' => 'Ένα',
             'en' => 'One',
         ]);
@@ -163,17 +155,31 @@ class TranslationTest extends TestCase
         $model->save();
         $this->reloadModel($model);
 
-        $this->assertEquals($model->_name->in('el'), 'Ένα');
-        $this->assertEquals($model->_name->in('en'), 'One');
+        $this->assertEquals($model->translations('name')->in('el'), 'Ένα');
+        $this->assertEquals($model->translations('name')->in('en'), 'One');
     }
 
+    public function test_set_array_format_from_model(){
+        $model = $this->getNewModel();
+
+        $model->name = [
+            'el' => 'Τρία',
+            'en' => 'Three',
+        ];
+
+        $model->save();
+        $this->reloadModel($model);
+
+        $this->assertEquals($model->translations('name')->in('el'), 'Τρία');
+        $this->assertEquals($model->translations('name')->in('en'), 'Three');
+    }
 
     public function test_get_translations() {
         $model = $this->getNewModel();
 
-        $this->assertInstanceOf(Translations::class,$model->_name);
+        $this->assertInstanceOf(Translations::class,$model->translations('name'));
 
-        $model->_name->set([
+        $model->translations('name')->set([
             'el' => 'Δευτέρα',
             'en' => 'Monday',
         ]);
@@ -181,18 +187,18 @@ class TranslationTest extends TestCase
         $model->save();
         $this->reloadModel($model);
 
-        $this->assertInstanceOf(Translations::class,$model->_name);
-        $this->assertInstanceOf(Translation::class, $model->_name->get('el'));
+        $this->assertInstanceOf(Translations::class,$model->translations('name'));
+        $this->assertInstanceOf(Translation::class, $model->translations('name')->get('el'));
 
-        $this->assertEquals($model->_name->in('el'), 'Δευτέρα');
-        $this->assertEquals($model->_name->in('en'), 'Monday');
-        $this->assertEquals($model->_name->in('invalid', 'el'), 'Δευτέρα');
+        $this->assertEquals($model->translations('name')->in('el'), 'Δευτέρα');
+        $this->assertEquals($model->translations('name')->in('en'), 'Monday');
+        $this->assertEquals($model->translations('name')->in('invalid', 'el'), 'Δευτέρα');
 
         App::setLocale('el');
         $this->assertEquals($model->name, 'Δευτέρα');
 
         $this->setExpectedException(TranslationNotFound::class);
-        $model->_name->in('invalid');
+        $model->translations('name')->in('invalid');
     }
 
     public function test_get_key_array_access() {
@@ -208,21 +214,51 @@ class TranslationTest extends TestCase
         $this->assertEquals($model->name, 'Τρίτη');
     }
 
-    public function test_new_model(){
+    public function test_model_new(){
         $model = new Day();
-        $this->assertInstanceOf(Translations::class,$model->_name);
+        $this->assertInstanceOf(Translations::class,$model->translations('name'));
 
         $model->name = 'Τρίτη';
         $this->assertEquals($model->name, 'Τρίτη');
         $model->save();
         $model = $this->reloadModel($model);
         $this->assertEquals($model->name, 'Τρίτη');
+
+        $model = new Day();
+        $model->translations('name')->set('el', 'Τετάρτη');
+        $model->save();
+        $model = $this->reloadModel($model);
+        $this->assertEquals($model->translate('el')->name, 'Τετάρτη');
+    }
+
+    public function test_model_create(){
+        App::setLocale('el');
+        $model = Day::create([
+            'weekend' => true,
+            'name' => 'Πέμπτη',
+        ]);
+        $this->assertEquals($model->name, 'Πέμπτη');
+        $model = $this->reloadModel($model);
+        $this->assertEquals($model->name, 'Πέμπτη');
+        $this->assertEquals($model->weekend, true);
+
+        $model = Day::create([
+            'weekend' => true,
+            'name' => [
+                'el' => 'Σάββατο',
+                'en' => 'Saturday',
+            ]
+        ]);
+        $this->assertEquals($model->translate('en')->name, 'Saturday');
+        $model = $this->reloadModel($model);
+        $this->assertEquals($model->translate('en')->name, 'Saturday');
+
     }
 
     public function test_translate_to_locale(){
         $model = $this->getNewModel();
         
-        $model->_name->set([
+        $model->translations('name')->set([
             'el' => 'Ένα',
             'en' => 'One',
             'de' => 'Eins',
@@ -235,15 +271,15 @@ class TranslationTest extends TestCase
 
         $model->translate('el')->name =  'Δύο';
         $model->name='Two';
-        $this->assertEquals($model->_name->in('el'), 'Δύο');
-        $this->assertEquals($model->_name->in('en'), 'Two');
+        $this->assertEquals($model->translations('name')->in('el'), 'Δύο');
+        $this->assertEquals($model->translations('name')->in('en'), 'Two');
 
     }
 
     public function test_fallback_locale(){
         $model = $this->getNewModel();
 
-        $model->_name->set([
+        $model->translations('name')->set([
             'el' => 'Κυριακή',
             'en' => 'Sunday',
         ]);
@@ -254,8 +290,8 @@ class TranslationTest extends TestCase
         $this->set_locale('de', 'en');
         $this->assertEquals($model->name, 'Sunday');
 
-        $this->assertEquals($model->_name->in('invalid','el'), 'Κυριακή');
-        $this->assertEquals($model->_name->in('el','invalid'), 'Κυριακή');
+        $this->assertEquals($model->translations('name')->in('invalid','el'), 'Κυριακή');
+        $this->assertEquals($model->translations('name')->in('el','invalid'), 'Κυριακή');
     }
 
 }

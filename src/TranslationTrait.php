@@ -3,29 +3,15 @@
 trait TranslationTrait{
 
     // $this->key (=string)
-    public function isTranslatable($key){
-        return isset($this->translatable) && in_array($key, $this->translatable);
+    public static function isTranslatable($key){
+        return isset(self::$translatable) && in_array($key, self::$translatable);
         // return array_key_exists("_$key", $this->attributes);
     }
 
-    // $this->_key (=Translation)
-    public function isTranslation($key){
-        return $key[0]=='_' && $this->isTranslatable(substr($key, 1));
-        // return array_key_exists("$key", $this->attributes) && $key[0]=='_';
-    }
-
-    public function getTranslationKey($key){
-        if($this->isTranslatable($key))
-            return $key;
-
-        if($this->isTranslation($key))
-            return substr($key, 1);
-
-        throw new Exceptions\KeyNotTranslatable($key);
-    }
-
     public function getTranslationId($key){
-        $key = $this->getTranslationKey($key);
+        if(!self::isTranslatable($key))
+            throw new Exceptions\KeyNotTranslatable($key);
+
 
         if(array_key_exists($key, $this->attributes))
             return $this->attributes[$key];
@@ -36,10 +22,14 @@ trait TranslationTrait{
 
     protected $translations = [];
 
-    public function getTranslations($key){
+    public function translations($key){
         $group_id = $this->getTranslationId($key);
         if(!array_key_exists($group_id, $this->translations)){
-            $this->translations[$group_id] = new Translations($group_id);
+            $translations = new Translations($group_id);
+            $group_id = $translations->group_id;
+            
+            $this->translations[$group_id] = $translations;
+            $this->attributes[$key] = $group_id;
         }
         return $this->translations[$group_id];
     }
@@ -69,15 +59,9 @@ trait TranslationTrait{
     protected function translatable_get($key){
         $this->translatable_handled=false;
 
-        if($this->isTranslation($key)){
-            $translations = $this->getTranslations($key);
+        if(self::isTranslatable($key)){
             $this->translatable_handled=true;
-            return $translations;
-        }
-
-        if($this->isTranslatable($key)){
-            $this->translatable_handled=true;
-            $translations = $this->getTranslations($key);
+            $translations = $this->translations($key);
             $result = $translations->in($this->translation_locale(), $this->translation_fallback());
             $this->translate(null, null);
             return $result;
@@ -87,10 +71,14 @@ trait TranslationTrait{
     protected function translatable_set($key, $value){
         $this->translatable_handled=false;
 
-        if($this->isTranslatable($key)){
-            $translations = $this->getTranslations($key);
-            $translations->set($this->translation_locale(), $value);
-            $this->attributes[$this->getTranslationKey($key)] = $translations->group_id;
+        if(self::isTranslatable($key)){
+            $translations = $this->translations($key);
+            if (is_array($value)){
+                $translations->set($value);
+            } else {            
+                $translations->set($this->translation_locale(), $value);
+            }
+            $this->attributes[$key] = $translations->group_id;
             $this->translate(null, null);
             $this->translatable_handled=true;
         }
@@ -123,6 +111,26 @@ trait TranslationTrait{
     //-------------------------------------------------
 
     public function __isset($key) {
-        return ($this->isTranslation($key) || $this->isTranslatable($key)  || parent::__isset($key));
+        return (self::isTranslatable($key)  || parent::__isset($key));
     }
+
+    public static function create(array $attributes = [])
+    {
+        $translations = [];
+        foreach ($attributes as $key => $value) {
+            if(self::isTranslatable($key)) {
+                $translations[$key] = $value;
+                $attributes[$key] = null;
+            }
+        }
+        $model = new static($attributes);
+
+        foreach ($translations as $key => $value) {
+            $model->translatable_set($key, $value);
+        }
+
+        $model->save();
+        return $model;
+    }
+
 }

@@ -29,8 +29,8 @@ Create a new migration with `artisan make:migration translations` and create the
     {
         Schema::create('translations', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('group_id');
-            $table->string('value');
+            $table->integer('group_id')->unsigned();
+            $table->string('value')->nullable();
             $table->string('locale', 2); // Can be any lenght!
         });
     }
@@ -52,7 +52,7 @@ In your migrations define any number of integer keys that you want to hold trans
     $table->integer('key')->unsigned()->nullable();
 ```
 
-### Step 3: Apply the Trait:
+### Step 3: Setup your model:
 
 Apply the `TranslationTrait` trait to any model that you want to have translatable keys:
 
@@ -69,39 +69,49 @@ Now you are ready to use translated keys!
 
 ## Usage
 
-To get a translated value simpy access the model key without the underscore. The curent application's locale will be used by default to retreive a translation. If no translation is defined then the Laravel's 'app.fallback_locale' will be used. If neither translation is found then an exception will be raised. So simpe!
+When you access a translatable key, then it's translation will be retrieved in the application's current locale. If no translation is defined then the Laravel's 'app.fallback_locale' will be used. If neither translation is found then an exception will be raised. So simpe!
 
 Get Translations:
 
 ```php
-$model->key;            // get the translated value of key for the current Locale
-$model->_key->in('de'); // request a translation in a different locale
-$model->_key;           // get instance of igaster\TranslateEloquent\Translations
-```
+$model->key='Monday';                    // Set the translation for the current Locale.  
+$model->key;                             // Get the translation for the current Locale
 
-Set Translations:
+$model->translate('de')->key = 'Montag'; // Set translation in a locale
+$model->translate('de')->key;            // Get translation in a locale
+$model->translate('de','en')->key;       // Get translation in a locale / fallback locale
 
-```php
-$model->day='Monday';               // set the translation for current Locale.  
-
-$model->_day->set('el', 'Δευτέρα'); // Set a translation for a given locale
-
-$model->_day->set([                 // Set all translations
+$model->key = [                          // To set a batch of translations assign to an array:
     'el' => 'Δευτέρα',
     'en' => 'Monday',
     'de' => 'Montag',
+];
+
+```
+
+Important notes:
+
+* When you create a new translation for the first time, you must save your model to persist the relationship: `$model->save();`. This is not necessary when updating a translation or adding a new locale.
+* When you set a value for a translation then an entry in the the `translations` table will be created / updated.
+
+Creating your models:
+
+```php
+// Create a model translated to current locale
+Day::create([
+    'weekend' => true,
+    'name' => 'Πέμπτη',
 ]);
 
-$model->save();                     // Don't forget to save your model to save the relationship
+// Create a model with many translations
+Day::create([
+    'weekend' => true,
+    'name' => [
+        'el' => 'Σάββατο',
+        'en' => 'Saturday',
+    ]
+]);
 ```
-
-on the fly translations:
-```php
-$model->translate('de')->key;           // Get Translation
-$model->translate('de')->key = 'Value'; // Set Translation
-```
-When you set a value for a translation then an entry in the the `translations` table will be created / updated.
-
 
 A short refreshment in Laravel locale functions (Locale is defined in `app.php` configuration file):
 ```php
@@ -109,6 +119,23 @@ App::setLocale('de');                    // Set curent Locale
 App::getLocale();                        // Get curent Locale
 Config::set('app.fallback_locale','el'); // Set fallback Locale
 ```
+
+You can achieve the same functionality with the `Translations` object.
+
+```php
+$translations = $model->_key;        // Get instance of igaster\TranslateEloquent\Translations
+$translations = $model->translations('key'); // instance of Translations collection
+
+$translations->in('de');             // Get a translation in a locale
+$translations->set('el', 'Δευτέρα'); // Set a translation in a locale
+
+$translations->set([                 // Set a batch of translations
+    'el' => 'Δευτέρα',
+    'en' => 'Monday',
+    'de' => 'Montag',
+]);
+```
+
 
 ## Handle Conflicts:
 
@@ -153,5 +180,5 @@ public function __set($key, $value) {
 
 * Cascade delete model + translations
 * Handle untranslated values (throwing Exception is brute force!)
-* Implement Model::create() & Model::update functions
+* Implement ~~Model::create()~~ & Model::update functions
 * any ideas? Send me a request...
