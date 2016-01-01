@@ -71,7 +71,7 @@ Now you are ready to use translated keys!
 
 When you access a translatable key, then it's translation will be retrieved in the application's current locale. If no translation is defined then the Laravel's 'app.fallback_locale' will be used. If neither translation is found then an exception will be raised. So simpe!
 
-Get Translations:
+### Work with translations:
 
 ```php
 $model->key='Monday';                    // Set the translation for the current Locale.  
@@ -81,7 +81,7 @@ $model->translate('de')->key = 'Montag'; // Set translation in a locale
 $model->translate('de')->key;            // Get translation in a locale
 $model->translate('de','en')->key;       // Get translation in a locale / fallback locale
 
-$model->key = [                          // To set a batch of translations assign to an array:
+$model->key = [                          // Set a batch of translations
     'el' => 'Δευτέρα',
     'en' => 'Monday',
     'de' => 'Montag',
@@ -94,7 +94,7 @@ Important notes:
 * When you create a new translation for the first time, you must save your model to persist the relationship: `$model->save();`. This is not necessary when updating a translation or adding a new locale.
 * When you set a value for a translation then an entry in the the `translations` table will be created / updated.
 
-Creating your models:
+### Creating translated models:
 
 ```php
 // Create a model translated to current locale
@@ -120,7 +120,7 @@ App::getLocale();                        // Get curent Locale
 Config::set('app.fallback_locale','el'); // Set fallback Locale
 ```
 
-You can achieve the same functionality with the `Translations` object.
+### You can achieve the same functionality with the `Translations` object.
 
 ```php
 $translations = $model->_key;        // Get instance of igaster\TranslateEloquent\Translations
@@ -135,7 +135,6 @@ $translations->set([                 // Set a batch of translations
     'de' => 'Montag',
 ]);
 ```
-
 
 ## Handle Conflicts:
 
