@@ -94,7 +94,7 @@ Important notes:
 * When you create a new translation for the first time, you must save your model to persist the relationship: `$model->save();`. This is not necessary when updating a translation or adding a new locale.
 * When you set a value for a translation then an entry in the the `translations` table will be created / updated.
 
-### Creating translated models:
+### Create/Update translated models:
 
 ```php
 // Create a model translated to current locale
@@ -112,6 +112,8 @@ Day::create([
     ]
 ]);
 ```
+
+You can also use `$model->update();` with the same way.
 
 A short refreshment in Laravel locale functions (Locale is defined in `app.php` configuration file):
 ```php
@@ -180,5 +182,4 @@ public function __set($key, $value) {
 
 * Cascade delete model + translations
 * Handle untranslated values (throwing Exception is brute force!)
-* Implement ~~Model::create()~~ & Model::update functions
 * any ideas? Send me a request...

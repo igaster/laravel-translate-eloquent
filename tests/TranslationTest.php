@@ -231,7 +231,7 @@ class TranslationTest extends TestCase
         $this->assertEquals($model->translate('el')->name, 'Τετάρτη');
     }
 
-    public function test_model_create(){
+    public function test_model_create_single_translation(){
         App::setLocale('el');
         $model = Day::create([
             'weekend' => true,
@@ -241,7 +241,9 @@ class TranslationTest extends TestCase
         $model = $this->reloadModel($model);
         $this->assertEquals($model->name, 'Πέμπτη');
         $this->assertEquals($model->weekend, true);
+    }
 
+    public function test_model_create_multiple_translations(){
         $model = Day::create([
             'weekend' => true,
             'name' => [
@@ -252,7 +254,37 @@ class TranslationTest extends TestCase
         $this->assertEquals($model->translate('en')->name, 'Saturday');
         $model = $this->reloadModel($model);
         $this->assertEquals($model->translate('en')->name, 'Saturday');
+    }
 
+    public function test_model_update(){
+        $model = Day::create([
+            'weekend' => false,
+            'name' => [
+                'el' => 'Κυριακή',
+                'en' => 'Sunday',
+            ]
+        ]);
+        $this->assertEquals($model->translate('en')->name, 'Sunday');
+
+        $model->update([
+            'weekend' => true,
+            'name' => [
+                'el' => 'Τετάρτη',
+                'en' => 'Wednesday',
+            ]
+        ]);
+
+        $this->assertEquals($model->translate('en')->name, 'Wednesday');
+        $model = $this->reloadModel($model);
+        $this->assertEquals($model->translate('en')->name, 'Wednesday');
+        $this->assertEquals(true, $model->weekend);
+
+        App::setLocale('el');
+        $model->update([
+            'weekend' => true,
+            'name' => 'Πέμπτη',
+        ]);
+        $this->assertEquals($model->translate('el')->name, 'Πέμπτη');
     }
 
     public function test_translate_to_locale(){

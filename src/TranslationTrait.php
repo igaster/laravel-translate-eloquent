@@ -27,7 +27,7 @@ trait TranslationTrait{
         if(!array_key_exists($group_id, $this->translations)){
             $translations = new Translations($group_id);
             $group_id = $translations->group_id;
-            
+
             $this->translations[$group_id] = $translations;
             $this->attributes[$key] = $group_id;
         }
@@ -133,4 +133,22 @@ trait TranslationTrait{
         return $model;
     }
 
+
+    public function update(array $attributes = [], array $options = [])
+    {
+        $translations = [];
+        foreach ($attributes as $key => $value) {
+            if(self::isTranslatable($key)) {
+                $translations[$key] = $value;
+                $attributes[$key] = null;
+            }
+        }
+        parent::update($attributes, $options);
+
+        foreach ($translations as $key => $value) {
+            $this->translatable_set($key, $value);
+        }
+        $this->save();
+        return $this;
+    }
 }
