@@ -4,7 +4,7 @@ use Illuminate\Database\Capsule\Manager as DB;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 use Orchestra\Testbench\TestCase;
 
-class TestCaseBase extends TestCase
+class TestCaseWithDatbase extends TestCase
 {
 
     // -----------------------------------------------

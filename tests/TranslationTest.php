@@ -12,7 +12,7 @@ use igaster\TranslateEloquent\Exceptions\TranslationNotFound;
 
 use igaster\TranslateEloquent\Test\Models\Day;
 
-class TranslationTest extends TestCaseBase
+class TranslationTest extends TestCaseWithDatbase
 {
 
     // -----------------------------------------------
