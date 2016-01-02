@@ -23,7 +23,7 @@
     "autoload": {
         "psr-4" : {
             "igaster\\TranslateEloquent\\" : "src/",
-            "igaster\\TranslateEloquent\\Test\\Models\\" : "tests/Models/"
+            "igaster\\TranslateEloquent\\Tests\\" : "tests/"
         }
     },
     "minimum-stability": "dev"

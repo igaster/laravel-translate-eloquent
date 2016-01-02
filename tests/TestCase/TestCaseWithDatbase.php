@@ -1,4 +1,4 @@
-<?php
+<?php namespace igaster\TranslateEloquent\Tests\TestCase;
 
 use Illuminate\Database\Capsule\Manager as DB;
 use Illuminate\Database\Eloquent\Model as Eloquent;
@@ -55,7 +55,7 @@ class TestCaseWithDatbase extends TestCase
 
     public function testDatabaseConnection()
     {
-    	$this->assertInstanceOf(Illuminate\Database\SQLiteConnection::class, $this->database->connection());
+    	$this->assertInstanceOf('Illuminate\Database\SQLiteConnection', $this->database->connection());
     }
 
     // -----------------------------------------------

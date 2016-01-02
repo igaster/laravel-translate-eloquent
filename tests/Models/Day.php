@@ -1,4 +1,4 @@
-<?php namespace igaster\TranslateEloquent\Test\Models;
+<?php namespace igaster\TranslateEloquent\Tests\Models;
 
 use Illuminate\Database\Eloquent\Model as Eloquent;
 
