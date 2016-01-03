@@ -98,13 +98,11 @@ Important notes:
 ```php
 // Create a model translated to current locale
 Day::create([
-    'weekend' => true,
     'name' => 'Πέμπτη',
 ]);
 
-// Create a model with many translations
+// Create a model with multiple translations
 Day::create([
-    'weekend' => true,
     'name' => [
         'el' => 'Σάββατο',
         'en' => 'Saturday',
@@ -113,6 +111,8 @@ Day::create([
 ```
 
 You can also use `$model->update();` with the same way.
+
+### Laravel & Locales:
 
 A short refreshment in Laravel locale functions (Locale is defined in `app.php` configuration file):
 ```php
@@ -126,7 +126,9 @@ Config::set('app.fallback_locale','el'); // Set fallback Locale
 You can achieve the same functionality with the `igaster\TranslateEloquent\Translations` object.
 
 ```php
-$translations = $model->translations('key'); // instance of Translations collection
+$translations = new Translations();          // Create a new Translations collection
+$translations = new Translations($group_id); // Load Translations with $group_id
+$translations = $model->translations('key'); // Get instance of Translations
 
 $translations->in('de');             // Get a translation in a locale
 $translations->set('el', 'Δευτέρα'); // Set a translation in a locale
@@ -136,6 +138,7 @@ $translations->set([                 // Set a batch of translations
     'en' => 'Monday',
     'de' => 'Montag',
 ]);
+
 ```
 
 ## Handle Conflicts:
