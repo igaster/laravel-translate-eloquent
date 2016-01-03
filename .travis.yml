@@ -9,12 +9,9 @@ sudo: false
 before_script:
   - composer self-update
 
-before_install:
-  - pip install --user codecov
-
 install: travis_retry composer install --no-interaction --prefer-source
 
 script: vendor/bin/phpunit --verbose
 
 after_success:
-  - codecov
+  - bash <(curl -s https://codecov.io/bash)
