@@ -151,10 +151,11 @@ Day::firstWithTranslation('name', 'en');    // First result (Day) from query wit
 Day::getWithTranslation('name', 'en');      // Collection of Day with 'name' translated in English
 ```
 Notes:
-* The '$locale' parameter is optional and defaults to application locale
+* The `$locale` parameter is optional and defaults to application locale
 * The column name is optional and defaults to first item in your `$translatable` array
 * The above query scopes should be used as an endpoint of your queries as they will return either a Model or a Collection
-Eager loading is designed do reduce to a signle query the read operations when you are retrieving a model from the Database. It uses a JOIN statement and not two subsequent queries as opposed to Eloquent eager loading. One limitation of this implementation is that you can request the translatin of one field. If your models have multiple keys that should be translated then all the subsequent read opperations will result to an extra query.
+
+Eager loading is designed do reduce to a signle query the read operations when you are retrieving a model from the Database. It uses a JOIN statement and not two subsequent queries as opposed to Eloquent eager loading. One limitation of this implementation is that you can only request the translation of a signle field. If your models have multiple keys that should be translated then all the subsequent read opperations will result to an extra query.
 
 
 ## Handle Conflicts:
