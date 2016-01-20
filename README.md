@@ -149,7 +149,9 @@ You can use these query scopes as if you want to retrieve a translation with the
 Day::findWithTranslation(1,'name', 'en');   // Day with id 1 with 'name' translated in English
 Day::firstWithTranslation('name', 'en');    // First result (Day) from query with 'name' translated in English
 Day::getWithTranslation('name', 'en');      // Collection of Day with 'name' translated in English
+Day::allWithTranslation('name', 'en');      // Collection of Day with 'name' translated in English
 ```
+
 Notes:
 * The `$locale` parameter is optional and defaults to application locale
 * The column name is optional and defaults to first item in your `$translatable` array
