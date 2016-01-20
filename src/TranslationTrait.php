@@ -109,16 +109,15 @@ trait TranslationTrait{
         $key = $key ?: reset(static::$translatable);
 
         // Join model with translations to reduce queries
-        $models = $query->leftJoin('translations', function ($join) use ($key, $locale) {
-            $join->on($this->getTable().".$key", '=', 'translations.group_id')
-                 ->on('translations.locale' , '=', $locale);
-        })->get([
-            $this->getTable().'.*',
-            'translations.id as tr_id',
-            'translations.value as tr_value',
-            'translations.locale as tr_locale',
-            'translations.group_id as tr_group_id',
-        ]);
+        $models = $query->leftJoin('translations', $this->getTable().".$key", '=', 'translations.group_id')
+            ->where('translations.locale' , '=', $locale)
+            ->get([
+                $this->getTable().'.*',
+                'translations.id as tr_id',
+                'translations.value as tr_value',
+                'translations.locale as tr_locale',
+                'translations.group_id as tr_group_id',
+            ]);
 
         $items = [];
         foreach ($models as $model) {
