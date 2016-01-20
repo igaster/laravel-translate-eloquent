@@ -347,4 +347,14 @@ class TranslationTest extends TestCaseWithDatbase
         $this->assertInstanceOf(Day::class, $collection->first());
         $this->assertEquals('Τετάρτη', $collection->first()->name);
     }
+
+    public function test_eager_load_translation_all(){
+        $this->createTwoDays();
+        App::setLocale('el');
+        $collection = Day::orderBy('id')->allWithTranslation();
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $collection);
+        $this->assertEquals(2, $collection->count());
+        $this->assertInstanceOf(Day::class, $collection->first());
+        $this->assertEquals('Τετάρτη', $collection->first()->name);
+    }    
 }

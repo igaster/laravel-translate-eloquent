@@ -127,6 +127,9 @@ trait TranslationTrait{
         return new Collection($items);
     }
 
+    public function scopeAllWithTranslation($query, $key = null, $locale = null) {
+        return $query->getWithTranslation($key, $locale);
+    }
 
     //-------------------------------------------------
 
