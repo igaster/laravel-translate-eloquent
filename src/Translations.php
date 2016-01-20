@@ -49,6 +49,12 @@ class Translations  {
 		}
 	}
 
+	public function attach(Translation $translation){
+		$translation->group_id = $this->group_id;
+		$this->translations[$translation->locale] = $translation;
+	}
+
+
 	public function in($locale, $fallback = null){
 		if($this->has($locale))
 			return $this->get($locale)->value;

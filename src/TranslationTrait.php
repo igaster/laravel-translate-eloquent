@@ -1,26 +1,23 @@
 <?php namespace igaster\TranslateEloquent;
 
-trait TranslationTrait{
+use Illuminate\Database\Eloquent\Collection;
 
-    // $this->key (=string)
+trait TranslationTrait{
+    public $translations = [];
+
     public static function isTranslatable($key){
         return isset(self::$translatable) && in_array($key, self::$translatable);
-        // return array_key_exists("_$key", $this->attributes);
     }
 
     public function getTranslationId($key){
         if(!self::isTranslatable($key))
             throw new Exceptions\KeyNotTranslatable($key);
 
-
         if(array_key_exists($key, $this->attributes))
             return $this->attributes[$key];
         else
             return null;
-
     }
-
-    protected $translations = [];
 
     public function translations($key){
         $group_id = $this->getTranslationId($key);
@@ -34,7 +31,7 @@ trait TranslationTrait{
         return $this->translations[$group_id];
     }
 
-    //---------------[Locale Helpers]------------------
+    //---------------[ Locale Helpers ]------------------
 
     protected $locale = null;
     protected $fallback_locale = null;
@@ -51,6 +48,85 @@ trait TranslationTrait{
     protected function translation_fallback(){
         return $this->fallback_locale ?: \Config::get('app.fallback_locale');
     }
+
+    //---------------[ eager Loading ]------------------
+
+    private function rebuildModelFromQuery($model){
+
+        // Recontsruct the Translation object
+        $translation = new Translation([
+            'id'        => $model->tr_id,
+            'value'     => $model->tr_value,
+            'locale'    => $model->tr_locale,
+            'group_id'  => $model->tr_group_id,
+        ]);
+        $translation->exists = true;
+
+        // Atatch the Translation to the Model
+        $group_id = $model->tr_group_id;
+        $translations = new Translations($group_id);
+        $translations->attach($translation);
+        $model->translations[$group_id] = $translations;
+
+        // Clean Model from injected translation keys
+        foreach (['tr_id', 'tr_value', 'tr_locale', 'tr_group_id'] as $key) {
+            unset($model->attributes[$key]);
+            unset($model->original[$key]);
+        }
+
+        return $model;        
+    }
+
+    public function scopeFirstWithTranslation($query, $key = null,$locale = null) {
+        
+        $locale = $locale ?: $this->translation_locale();
+        $key = $key ?: reset(static::$translatable);
+
+        // Join model with translations to reduce queries
+        $model = $query->leftJoin('translations', function ($join) use ($key, $locale) {
+            $join->on($this->getTable().".$key", '=', 'translations.group_id')
+                 ->on('translations.locale' , '=', $locale);
+        })->first([
+            $this->getTable().'.*',
+            'translations.id as tr_id',
+            'translations.value as tr_value',
+            'translations.locale as tr_locale',
+            'translations.group_id as tr_group_id',
+        ]);
+
+        $model = $this->rebuildModelFromQuery($model);
+
+        return $model;
+    }
+
+    public function scopeFindWithTranslation($query, $id, $key = null, $locale = null) {
+        return $query->where($this->getTable().'.id', '=', $id)->firstWithTranslation($key, $locale);
+    }
+
+    public function scopeGetWithTranslation($query, $key = null,$locale = null) {
+        
+        $locale = $locale ?: $this->translation_locale();
+        $key = $key ?: reset(static::$translatable);
+
+        // Join model with translations to reduce queries
+        $models = $query->leftJoin('translations', function ($join) use ($key, $locale) {
+            $join->on($this->getTable().".$key", '=', 'translations.group_id')
+                 ->on('translations.locale' , '=', $locale);
+        })->get([
+            $this->getTable().'.*',
+            'translations.id as tr_id',
+            'translations.value as tr_value',
+            'translations.locale as tr_locale',
+            'translations.group_id as tr_group_id',
+        ]);
+
+        $items = [];
+        foreach ($models as $model) {
+            $items[] = $this->rebuildModelFromQuery($model);
+        }
+        return new Collection($items);
+    }
+
 
     //-------------------------------------------------
 
@@ -132,7 +208,6 @@ trait TranslationTrait{
         $model->save();
         return $model;
     }
-
 
     public function update(array $attributes = [], array $options = [])
     {

@@ -11,4 +11,8 @@ class Day extends Eloquent
     protected static $translatable = ['name'];
 
     // protected $fillable = ['key'];
+
+    public function getWeekendAttribute($value){
+    	return (boolean) $value;
+    }
 }

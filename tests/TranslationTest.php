@@ -272,58 +272,79 @@ class TranslationTest extends TestCaseWithDatbase
         $this->assertEquals($model->translate('en')->name, 'Saturday');
     }
 
-    public function test_model_update(){
-        $model = Day::create([
-            'weekend' => false,
-            'name' => [
-                'el' => 'Κυριακή',
-                'en' => 'Sunday',
-            ]
-        ]);
-        $this->assertEquals($model->translate('en')->name, 'Sunday');
 
-        $model->update([
-            'weekend' => true,
+    public function createTwoDays(){
+        $day1 = Day::create([
+            'weekend' => false,
             'name' => [
                 'el' => 'Τετάρτη',
                 'en' => 'Wednesday',
             ]
         ]);
 
-        $this->assertEquals($model->translate('en')->name, 'Wednesday');
-        $model = $this->reloadModel($model);
-        $this->assertEquals($model->translate('en')->name, 'Wednesday');
-        $this->assertEquals(true, $model->weekend);
+        $day2 = Day::create([
+            'weekend' => true,
+            'name' => [
+                'el' => 'Κυριακή',
+                'en' => 'Sunday',
+            ]
+        ]);
+
+        return [$day1, $day2];
+    }
+
+    public function test_model_update(){
+        list($day1,$day2) = $this->createTwoDays();
+
+        $this->assertEquals($day1->translate('en')->name, 'Wednesday');
+        $day1 = $this->reloadModel($day1);
+        $this->assertEquals($day1->translate('en')->name, 'Wednesday');
+        $this->assertEquals(false, $day1->weekend);
 
         App::setLocale('el');
-        $model->update([
+        $day1->update([
             'weekend' => true,
             'name' => 'Πέμπτη',
         ]);
-        $this->assertEquals($model->translate('el')->name, 'Πέμπτη');
+        $this->assertEquals($day1->translate('el')->name, 'Πέμπτη');
     }
 
     public function test_model_delete(){
-        $model = Day::create([
-            'weekend' => false,
-            'name' => [
-                'el' => 'zzz-el',
-                'en' => 'zzz-en',
-            ]
-        ]);
+        list($day1,$day2) = $this->createTwoDays();
 
-        $model = Day::create([
-            'weekend' => false,
-            'name' => [
-                'el' => 'xxx-el',
-                'en' => 'xxx-en',
-            ]
-        ]);
-        $this->seeInDatabase('translations', ['value' => 'xxx-el']);
-        $model->delete();
-        $this->notSeeInDatabase('days', ['id' => $model->id]);
-        $this->notSeeInDatabase('translations', ['value' => 'xxx-el']);
-        $this->notSeeInDatabase('translations', ['value' => 'xxx-en']);
-        $this->seeInDatabase('translations', ['value' => 'zzz-el']);
+        $this->seeInDatabase('translations', ['value' => 'Wednesday']);
+        $day1->delete();
+        $this->notSeeInDatabase('days', ['id' => $day1->id]);
+        $this->notSeeInDatabase('translations', ['value' => 'Wednesday']);
+        $this->notSeeInDatabase('translations', ['value' => 'Τετάρτη']);
+        $this->seeInDatabase('translations', ['value' => 'Κυριακή']);
+    }
+
+    public function test_eager_load_translation_first(){
+        $this->createTwoDays();
+        App::setLocale('el');
+        $model = Day::where('weekend',true)->firstWithTranslation('name');
+        $this->assertEquals('Κυριακή', $model->name);
+    }
+
+    public function test_eager_load_translation_find(){
+        $this->createTwoDays();
+        App::setLocale('el');
+        $model = Day::findWithTranslation(1,'name');
+        $this->assertEquals('Τετάρτη', $model->name);
+
+        $model = Day::findWithTranslation(2);
+        $this->assertEquals('Κυριακή', $model->name);
+
+    }
+
+    public function test_eager_load_translation_get(){
+        $this->createTwoDays();
+        App::setLocale('el');
+        $collection = Day::orderBy('id')->getWithTranslation('name');
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $collection);
+        $this->assertEquals(2, $collection->count());
+        $this->assertInstanceOf(Day::class, $collection->first());
+        $this->assertEquals('Τετάρτη', $collection->first()->name);
     }
 }
