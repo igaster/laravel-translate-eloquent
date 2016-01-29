@@ -309,6 +309,29 @@ class TranslationTest extends TestCaseWithDatbase
         $this->assertEquals($day1->translate('el')->name, 'Πέμπτη');
     }
 
+    public function test_model_update_lang(){
+        list($day1,$day2) = $this->createTwoDays();
+
+        $day1 = $this->reloadModel($day1);
+
+        $day1->update([
+            'name' => [
+                'el' => 'Πέμπτη',
+            ],
+        ]);
+
+        $day1->update([
+            'name' => [
+                'en' => 'Thursday',
+            ],
+        ]);
+
+        $day1 = $this->reloadModel($day1);
+
+        $this->assertEquals($day1->translate('el')->name, 'Πέμπτη');
+        $this->assertEquals($day1->translate('en')->name, 'Thursday');
+    }
+
     public function test_model_delete(){
         list($day1,$day2) = $this->createTwoDays();
 

@@ -198,7 +198,7 @@ trait TranslationTrait{
         foreach ($attributes as $key => $value) {
             if(self::isTranslatable($key)) {
                 $translations[$key] = $value;
-                $attributes[$key] = null;
+                unset($attributes[$key]);
             }
         }
         $model = new static($attributes);
@@ -217,7 +217,7 @@ trait TranslationTrait{
         foreach ($attributes as $key => $value) {
             if(self::isTranslatable($key)) {
                 $translations[$key] = $value;
-                $attributes[$key] = null;
+                unset($attributes[$key]);
             }
         }
         parent::update($attributes, $options);
