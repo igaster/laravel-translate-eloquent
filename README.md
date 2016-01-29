@@ -28,9 +28,9 @@ Create a new migration with `artisan make:migration translations` and create the
     {
         Schema::create('translations', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('group_id')->unsigned();
-            $table->string('value')->nullable();
-            $table->string('locale', 2); // Can be any lenght!
+            $table->integer('group_id')->unsigned()->index();
+            $table->text('value')->nullable();
+            $table->string('locale', 2)->index(); // Can be any lenght!
         });
     }
 
