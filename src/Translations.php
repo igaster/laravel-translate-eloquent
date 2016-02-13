@@ -62,7 +62,7 @@ class Translations  {
 		if($fallback)
 			return $this->in($fallback);
 
-		throw new Exceptions\TranslationNotFound($this->group_id);
+		// throw new Exceptions\TranslationNotFound($this->group_id);
 		return '';
 	}
 

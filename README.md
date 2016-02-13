@@ -68,7 +68,7 @@ Now you are ready to use translated keys!
 
 ## Usage
 
-When you access a translatable key, then it's translation will be retrieved in the application's current locale. If no translation is defined then the Laravel's 'app.fallback_locale' will be used. If neither translation is found then an exception will be raised. So simpe!
+When you access a translatable key, then it's translation will be retrieved in the application's current locale. If no translation is defined then the Laravel's 'app.fallback_locale' will be used. If neither translation is found then an an empty string will be returned. So simpe!
 
 ### Work with translations:
 
@@ -230,5 +230,5 @@ The same aproach can be followed if you need to override Eloquent's `create()` o
 
 ## Todo
 * ~~Cascade delete model + translations~~ Fixed
-* Handle untranslated values (throwing Exception is brute force!)
+* Eager Load multiple keys per request...
 * any ideas? Send me a request...

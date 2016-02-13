@@ -80,8 +80,7 @@ class TranslationTest extends TestCaseWithDatbase
         $this->assertEquals($translations->has('en'), true);
 
         // Not found
-        $this->setExpectedException(TranslationNotFound::class);
-        $translations->in('invalid');
+        $this->assertEquals('', $translations->in('invalid'));
     }
 
     public function test_trait() {
@@ -173,8 +172,10 @@ class TranslationTest extends TestCaseWithDatbase
         App::setLocale('el');
         $this->assertEquals($model->name, 'Δευτέρα');
 
-        $this->setExpectedException(TranslationNotFound::class);
-        $model->translations('name')->in('invalid');
+        // $this->setExpectedException(TranslationNotFound::class);
+        // $model->translations('name')->in('invalid');
+
+        $this->assertEquals('', $model->translations('name')->in('invalid') );
     }
 
     public function test_get_key_array_access() {
