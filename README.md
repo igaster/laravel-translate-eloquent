@@ -126,8 +126,6 @@ Config::set('app.fallback_locale','el'); // Set fallback Locale
 You can achieve the same functionality with the `igaster\TranslateEloquent\Translations` object.
 
 ```php
-$translations = new Translations();          // Create a new Translations collection
-$translations = new Translations($group_id); // Load Translations with $group_id
 $translations = $model->translations('key'); // Get instance of Translations
 
 $translations->in('de');             // Get a translation in a locale
@@ -139,6 +137,21 @@ $translations->set([                 // Set a batch of translations
     'de' => 'Montag',
 ]);
 
+```
+
+Want to dive deeper into the internals?
+
+* `Translations` object holds all translations for a key. Multiple transltions are grouped under the same `group_id` value
+* `Translation` object is an Eloquent model (maps to the `translations` table) that represents a single translation for one key in one locale
+
+```php
+$translations = new Translations();          // Create a new Translations collection
+$translations = new Translations($group_id); // or load Translations with $group_id
+$translations->group_id;  // column `translations.group_id` groups all translations for a key
+
+$translation = $translations->get('en');  // Get instance of `Translation` (a single translations)
+$translation->id;                   // From this model you have access to the actual translations record
+$translation->value='New Value';    // in your database. You can perform any raw opperation on it.
 ```
 
 ## Eager Loading:
