@@ -1,6 +1,6 @@
 {
     "name": "igaster/laravel-translate-eloquent",
-	"description": "Single table solution to translate Laravel Models",
+    "description": "Dead-simple translations for Laravel Models. Requires a single table in your database",
     "keywords": ["translation", "localization", "translate-models", "translate-eloquent", "laravel-5.x", "package", "trait"],
     "license": "MIT",
     "homepage": "https://github.com/igaster/laravel-translate-eloquent.git",
