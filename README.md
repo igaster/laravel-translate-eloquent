@@ -130,6 +130,7 @@ $translations = $model->translations('key'); // Get instance of Translations
 
 $translations->in('de');             // Get a translation in a locale
 $translations->set('el', 'Δευτέρα'); // Set a translation in a locale
+$translations->has('el');            // Check if a translation exists
 
 $translations->set([                 // Set a batch of translations
     'el' => 'Δευτέρα',
