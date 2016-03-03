@@ -22,7 +22,8 @@ class Translations  {
 	}
 
 	public function has($locale){
-		return !empty($this->get($locale));
+        $result = $this->get($locale);
+        return !empty($result);
 	}
 
 	public function set($locale, $value=null){
