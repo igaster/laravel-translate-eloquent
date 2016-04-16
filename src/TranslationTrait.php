@@ -6,7 +6,7 @@ trait TranslationTrait{
     public $translations = [];
 
     public static function isTranslatable($key){
-        return isset(self::$translatable) && in_array($key, self::$translatable);
+        return isset(static::$translatable) && in_array($key, static::$translatable);
     }
 
     public function getTranslationId($key){
@@ -232,7 +232,7 @@ trait TranslationTrait{
     public static function boot()
     {
         self::deleting(function ($model) {
-            foreach (self::$translatable as $key) {
+            foreach (static::$translatable as $key) {
                 Translation::where('group_id',$model->attributes[$key])->delete();
             }
         });
