@@ -1,12 +1,12 @@
 language: php
 
 php:
-  - 5.5
+  - 7.0
   - hhvm
 
 sudo: false
 
-before_script:
+before_install:
   - composer self-update
 
 install: 

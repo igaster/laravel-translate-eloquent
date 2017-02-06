@@ -5,12 +5,10 @@ use Illuminate\Database\Eloquent\Model as Eloquent;
 class Day extends Eloquent
 {
     use \igaster\TranslateEloquent\TranslationTrait;
-
+	protected $guarded = [];
     protected $table = 'days';
 
     protected static $translatable = ['name'];
-
-    // protected $fillable = ['key'];
 
     public function getWeekendAttribute($value){
     	return (boolean) $value;

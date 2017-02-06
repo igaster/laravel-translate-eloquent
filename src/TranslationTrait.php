@@ -202,6 +202,14 @@ trait TranslationTrait{
             }
         }
         $model = new static($attributes);
+        
+        // Replace empty with Dummy translations
+        foreach (self::$translatable as $key){
+            if(!isset($translations[$key]))
+                $translations[$key] = [
+                    'xx' => '', // Dummy
+                ];
+        }
 
         foreach ($translations as $key => $value) {
             $model->translatable_set($key, $value);

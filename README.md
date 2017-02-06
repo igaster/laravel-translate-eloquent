@@ -30,7 +30,7 @@ Create a new migration with `artisan make:migration translations` and create the
             $table->increments('id');
             $table->integer('group_id')->unsigned()->index();
             $table->text('value')->nullable();
-            $table->string('locale', 2)->index(); // Can be any lenght!
+            $table->string('locale', 2)->index(); // Can be any length!
         });
     }
 

@@ -48,6 +48,12 @@ class Translations  {
 				'locale'	=> $locale,
 			]);
 		}
+
+		if($locale !=='xx' && $dummy = $this->get('xx')){
+			$dummy->delete();
+		}
+
+
 	}
 
 	public function attach(Translation $translation){

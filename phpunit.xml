@@ -15,4 +15,7 @@
             <directory suffix=".php">./tests/</directory>
         </testsuite>
     </testsuites>
+    <php>
+        <env name="NAME" value="VALUE"/>
+    </php>
 </phpunit>

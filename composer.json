@@ -1,7 +1,7 @@
 {
     "name": "igaster/laravel-translate-eloquent",
-    "description": "Dead-simple translations for Laravel Models. Requires a single table in your database",
-    "keywords": ["translation", "localization", "translate-models", "translate-eloquent", "laravel-5.x", "package", "trait"],
+	"description": "Description",
+    "keywords": ["laravel-5.x", "package"],
     "license": "MIT",
     "homepage": "https://github.com/igaster/laravel-translate-eloquent.git",
     "authors": [
@@ -10,21 +10,17 @@
             "email": "igasteratos@gmail.com"
         }
     ],	
-    "require": {
-        "php": ">=5.4.0",
-        "illuminate/support": "5.*"
-    },
     "require-dev": {
-        "illuminate/database": "~5.2",
-        "orchestra/testbench": "~3.0", 
-        "vlucas/phpdotenv": "~2.0",      
-        "phpunit/phpunit": "~4.0"
-    },        
+        "orchestra/testbench": "~3.4"
+    },     
     "autoload": {
         "psr-4" : {
-            "igaster\\TranslateEloquent\\" : "src/",
-            "igaster\\TranslateEloquent\\Tests\\" : "tests/"
+            "igaster\\TranslateEloquent\\"        : "src/",
+            "igaster\\TranslateEloquent\\Tests\\" : "tests/"            
         }
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "stable",
+    "require": {
+        "phpunit/phpunit": "^6.0"
+    }
 }

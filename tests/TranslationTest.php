@@ -1,6 +1,6 @@
 <?php
 
-use igaster\TranslateEloquent\Tests\TestCase\TestCaseWithDatbase;
+
 
 use igaster\TranslateEloquent\Translatable;
 use igaster\TranslateEloquent\Translations;
@@ -10,11 +10,11 @@ use igaster\TranslateEloquent\Exceptions\TranslationNotFound;
 
 use igaster\TranslateEloquent\Tests\Models\Day;
 
-class TranslationTest extends TestCaseWithDatbase
-{
+class TranslationTest extends abstractTest {
+
 
     // -----------------------------------------------
-    //  Setup Database
+    //  Setup Database (Run before each Test)
     // -----------------------------------------------
 
     public function setUp()
@@ -22,14 +22,14 @@ class TranslationTest extends TestCaseWithDatbase
         parent::setUp();
 
         // -- Set  migrations
-        $this->database->schema()->create('translations', function ($table) {
+        Schema::create('translations', function ($table) {
             $table->increments('id');
             $table->string('group_id');
             $table->string('value');
             $table->string('locale', 2); // Can be any lenght!
         });
 
-        $this->database->schema()->create('days', function ($table) {
+        Schema::create('days', function ($table) {
             $table->increments('id');
             $table->integer('name')->unsigned()->nullable();
             $table->boolean('weekend')->default(false);
@@ -38,10 +38,12 @@ class TranslationTest extends TestCaseWithDatbase
     }
 
     public function tearDown() {
-        $this->database->schema()->drop('days');
-        $this->database->schema()->drop('translations');
+        Schema::drop('days');
+        Schema::drop('translations');
     }
 
+    // -----------------------------------------------
+    //  Tests
     // -----------------------------------------------
 
     private function getNewModel(){
@@ -49,9 +51,9 @@ class TranslationTest extends TestCaseWithDatbase
         return $this->reloadModel($model);
     }
 
-    private function reloadModel($model){
-        return Day::find($model->id);
-    }
+    // private function reloadModel($model){
+    //     return Day::find($model->id);
+    // }
 
     private function set_locale($locale, $fallback_locale){
         App::setLocale($locale);
@@ -83,19 +85,20 @@ class TranslationTest extends TestCaseWithDatbase
         $this->assertEquals('', $translations->in('invalid'));
     }
 
+
     public function test_trait() {
         $model = $this->getNewModel();
         $this->assertEquals(true,  Day::isTranslatable('name'));
         $this->assertEquals(false, Day::isTranslatable('weekend'));
         $this->assertEquals(false, Day::isTranslatable('invalid'));
 
-        $this->assertNull($model->getTranslationId('name'));
+        $this->assertNotNull($model->getTranslationId('name'));
 
         $this->assertInstanceOf(Translations::class, $model->translations('name'));
         
         $this->assertEquals(isset($model->name), true);
 
-        $this->setExpectedException(KeyNotTranslatable::class);
+        $this->expectException(KeyNotTranslatable::class);
         $model->getTranslationId('invalid');
     }
 
@@ -172,7 +175,7 @@ class TranslationTest extends TestCaseWithDatbase
         App::setLocale('el');
         $this->assertEquals($model->name, 'Δευτέρα');
 
-        // $this->setExpectedException(TranslationNotFound::class);
+        // $this->expectException(TranslationNotFound::class);
         // $model->translations('name')->in('invalid');
 
         $this->assertEquals('', $model->translations('name')->in('invalid') );
@@ -258,6 +261,69 @@ class TranslationTest extends TestCaseWithDatbase
         $model = $this->reloadModel($model);
         $this->assertEquals($model->name, 'Πέμπτη');
         $this->assertEquals($model->weekend, true);
+    }
+
+
+    public function test_group_id(){
+        $day1 = Day::create(['name' => 'Πέμπτη']);
+        $day1 = $this->reloadModel($day1);
+        $this->assertEquals($day1->translations('name')->group_id, 1);
+
+        $day2 = Day::create(['name' => 'Παρασκευή']);
+        $day2 = $this->reloadModel($day2);
+        $this->assertEquals($day2->translations('name')->group_id, 2);
+
+        $day1->delete();
+
+        $day3 = Day::create(['name' => 'Παρασκευή']);
+        $day3 = $this->reloadModel($day3);
+        $this->assertEquals($day3->translations('name')->group_id, 3);
+    }
+
+    public function test_empty(){
+        $day1 = Day::create();        
+        $this->seeInDatabase('translations', ['locale' => 'xx']);
+
+        $day2 = Day::create();
+
+        $day1 = $this->reloadModel($day1);
+        $day2 = $this->reloadModel($day2);
+
+        $this->assertEquals($day1->translations('name')->group_id, 1);
+        $this->assertEquals($day2->translations('name')->group_id, 2);
+    }
+
+    public function test_remove_dummy_translation(){
+        $day1 = Day::create();        
+        $this->seeInDatabase('translations', ['locale' => 'xx']);
+        $day1->name = 'Τρίτη';
+        $this->notSeeInDatabase('translations', ['locale' => 'xx']);
+        $this->seeInDatabase('translations', ['value' => 'Τρίτη']);
+    }
+
+    public function test_del_all_translations(){
+        App::setLocale('en');
+        $day1 = Day::create(['name' => 'Monday']);
+        $this->notSeeInDatabase('translations', ['locale' => 'xx']);
+
+        $day1->translations('name')->get('en')->delete();
+        $this->notSeeInDatabase('translations', ['value' => 'Monday']);
+        $this->seeInDatabase('translations', ['locale' => 'xx']);
+
+        $day2 = Day::create(['name' => 'Friday']);
+
+        $day1 = $this->reloadModel($day1);
+        $day2 = $this->reloadModel($day2);
+
+        $day1->name = 'Sunday';
+        $this->seeInDatabase('translations', ['value' => 'Sunday']);
+        $this->notSeeInDatabase('translations', ['locale' => 'xx']);
+        $this->assertEquals('Sunday', $day1->name);
+
+        $this->assertEquals($day1->translations('name')->group_id, 1);
+        $this->assertEquals($day2->translations('name')->group_id, 2);
+
+
     }
 
     public function test_model_create_multiple_translations(){
@@ -380,5 +446,5 @@ class TranslationTest extends TestCaseWithDatbase
         $this->assertEquals(2, $collection->count());
         $this->assertInstanceOf(Day::class, $collection->first());
         $this->assertEquals('Τετάρτη', $collection->first()->name);
-    }    
+    }
 }
