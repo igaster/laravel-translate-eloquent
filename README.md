@@ -180,7 +180,7 @@ Notes:
 
 ## Performance considerations:
 
-Please notice that using a sinle Table for all trasnlations is not the optimal architecture when consindering database performance. Each translatino requires one query to the database. If performance is an issue you can check alternative implementations like [dimsav/laravel-translatable](https://github.com/dimsav/laravel-translatable)
+Please notice that using a sinle Table for all trasnlations is not the optimal architecture when consindering database performance. Each translation requires one seperate query to the database. If performance is an issue you can check alternative implementations like [dimsav/laravel-translatable](https://github.com/dimsav/laravel-translatable)
 
 ## Handle Conflicts:
 
