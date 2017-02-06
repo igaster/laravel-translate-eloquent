@@ -178,6 +178,9 @@ Notes:
 * Eager loading is designed do reduce to a signle query the read operations when you are retrieving a model from the Database. It uses a JOIN statement and not two subsequent queries as opposed to Eloquent eager loading. One limitation of this implementation is that you can only request the translation of a signle field. 
 * If your models have multiple keys that should be translated then all the subsequent read opperations will result to an extra query.
 
+## Performance considerations:
+
+Please notice that using a sinle Table for all trasnlations is not the optimal architecture when consindering database performance. Each translatino requires one query to the database. If performance is an issue you can check alternative implementations like [dimsav/laravel-translatable](https://github.com/dimsav/laravel-translatable)
 
 ## Handle Conflicts:
 
