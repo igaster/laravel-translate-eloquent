@@ -205,7 +205,7 @@ trait TranslationTrait{
         
         // Replace empty with Dummy translations
         foreach (self::$translatable as $key){
-            if(!isset($translations[$key]))
+            if(!isset($translations[$key]) || $translations[$key]==[])
                 $translations[$key] = [
                     'xx' => '', // Dummy
                 ];

@@ -292,6 +292,24 @@ class TranslationTest extends abstractTest {
         $this->assertEquals($day2->translations('name')->group_id, 2);
     }
 
+    public function test_empty_array(){
+        $day = Day::create([
+            'name' => [],
+        ]);        
+        $this->seeInDatabase('translations', ['locale' => 'xx']);
+        $day = $this->reloadModel($day);
+        $this->assertEquals($day->translations('name')->group_id, 1);
+    }
+
+    public function test_null(){
+        $day = Day::create([
+            'name' => null,
+        ]);        
+        $this->seeInDatabase('translations', ['locale' => 'xx']);
+        $day = $this->reloadModel($day);
+        $this->assertEquals($day->translations('name')->group_id, 1);
+    }
+
     public function test_remove_dummy_translation(){
         $day1 = Day::create();        
         $this->seeInDatabase('translations', ['locale' => 'xx']);
