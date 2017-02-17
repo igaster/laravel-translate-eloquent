@@ -59,11 +59,11 @@ Define migrations to simply modify your existing models to use translations and 
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use igaster\TranslateEloquent\TranslationMigrationTrait;
+use igaster\TranslateEloquent\MigrationTrait;
 
-class AddTranslationToTeamsTable extends Migration
+class AddTranslationToMyTable extends Migration
 {
-    use TranslationMigrationTrait;
+    use MigrationTrait;
 
     public $table = 'my_table';
     public $fields = ['key1', 'key2'];
