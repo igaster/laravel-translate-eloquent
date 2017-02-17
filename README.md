@@ -59,7 +59,7 @@ Define migrations to simply modify your existing models to use translations and 
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use App\Library\TranslationMigrationTrait;
+use igaster\TranslateEloquent\TranslationMigrationTrait;
 
 class AddTranslationToTeamsTable extends Migration
 {
