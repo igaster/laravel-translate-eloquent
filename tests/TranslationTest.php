@@ -1,5 +1,4 @@
-<?php namespace igaster\TranslateEloquent\Tests;
-
+<?php
 
 use igaster\TranslateEloquent\Translatable;
 use igaster\TranslateEloquent\Translations;

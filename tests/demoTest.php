@@ -1,4 +1,4 @@
-<?php namespace igaster\TranslateEloquent\Tests;
+<?php
 
 use igaster\TranslateEloquent\Tests\App\TestModel;
 
@@ -27,7 +27,7 @@ class TestCase extends abstractTest {
         parent::setUp();
 
         // -- Set  migrations
-        \Schema::create('test_table', function ($table) {
+        Schema::create('test_table', function ($table) {
             $table->increments('id');
             $table->string('key')->nullable();
             $table->timestamps();
@@ -35,7 +35,7 @@ class TestCase extends abstractTest {
     }
 
     public function _tearDown() {
-        \Schema::drop('test_table');
+        Schema::drop('test_table');
         parent::teadDown();
     }
 

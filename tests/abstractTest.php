@@ -1,4 +1,4 @@
-<?php namespace igaster\TranslateEloquent\Tests;
+<?php
 
 abstract class abstractTest extends \Orchestra\Testbench\TestCase {
 
@@ -11,7 +11,7 @@ abstract class abstractTest extends \Orchestra\Testbench\TestCase {
         parent::setUpBeforeClass();
         
         if (file_exists(__DIR__.'/../.env')) {
-            $dotenv = new \Dotenv\Dotenv(__DIR__.'/../');
+            $dotenv = new Dotenv\Dotenv(__DIR__.'/../');
             $dotenv->load();
         }
     }
@@ -58,7 +58,7 @@ abstract class abstractTest extends \Orchestra\Testbench\TestCase {
     protected function seeInDatabase($table, array $data, $connection = null)
     {
 
-        $count = \DB::table($table)->where($data)->count();
+        $count = DB::table($table)->where($data)->count();
         
         $this->assertGreaterThan(0, $count, sprintf(
             'Unable to find row in database table [%s] that matched attributes [%s].', $table, json_encode($data)
@@ -69,7 +69,7 @@ abstract class abstractTest extends \Orchestra\Testbench\TestCase {
 
     protected function notSeeInDatabase($table, array $data, $connection = null)
     {
-        $count = \DB::table($table)->where($data)->count();
+        $count = DB::table($table)->where($data)->count();
         
         $this->assertEquals(0, $count, sprintf(
             'Found unexpected records in database table [%s] that matched attributes [%s].', $table, json_encode($data)
