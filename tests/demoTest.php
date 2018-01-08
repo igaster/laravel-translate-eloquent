@@ -2,18 +2,21 @@
 
 use igaster\TranslateEloquent\Tests\App\TestModel;
 
-class TestCase extends abstractTest {
+class TestCase extends abstractTest
+{
 
     // -----------------------------------------------
     //   Global Setup(Run Once)
     // -----------------------------------------------
 
-    public static function setUpBeforeClass() {
+    public static function setUpBeforeClass()
+    {
         parent::setUpBeforeClass();
         // Your Code here...
     }
 
-    public static function tearDownAfterClass(){
+    public static function tearDownAfterClass()
+    {
         // Your Code here...
         parent::tearDownAfterClass();
     }
@@ -34,7 +37,8 @@ class TestCase extends abstractTest {
         });
     }
 
-    public function _tearDown() {
+    public function _tearDown()
+    {
         Schema::drop('test_table');
         parent::teadDown();
     }
@@ -43,12 +47,12 @@ class TestCase extends abstractTest {
     //  Tests
     // -----------------------------------------------
 
-    public function testDummy() {        
+    public function testDummy()
+    {
         $model = TestModel::create([
- 			'key' => 'value',
+            'key' => 'value',
         ]);
         $model->fresh();
         $this->assertEquals("value", $model->key);
     }
-
 }

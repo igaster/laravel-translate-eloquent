@@ -2,26 +2,32 @@
 
 use Illuminate\Database\Eloquent\Collection;
 
-trait TranslationTrait{
+trait TranslationTrait
+{
     public $translations = [];
 
-    public static function isTranslatable($key){
+    public static function isTranslatable($key)
+    {
         return isset(static::$translatable) && in_array($key, static::$translatable);
     }
 
-    public function getTranslationId($key){
-        if(!self::isTranslatable($key))
+    public function getTranslationId($key)
+    {
+        if (!self::isTranslatable($key)) {
             throw new Exceptions\KeyNotTranslatable($key);
+        }
 
-        if(array_key_exists($key, $this->attributes))
+        if (array_key_exists($key, $this->attributes)) {
             return $this->attributes[$key];
-        else
+        } else {
             return null;
+        }
     }
 
-    public function translations($key){
+    public function translations($key)
+    {
         $group_id = $this->getTranslationId($key);
-        if(!array_key_exists($group_id, $this->translations)){
+        if (!array_key_exists($group_id, $this->translations)) {
             $translations = new Translations($group_id);
             $group_id = $translations->group_id;
 
@@ -35,23 +41,27 @@ trait TranslationTrait{
 
     protected $locale = null;
     protected $fallback_locale = null;
-    public function translate($locale, $fallback_locale = null){
+    public function translate($locale, $fallback_locale = null)
+    {
         $this->locale = $locale;
         $this->fallback_locale = $fallback_locale;
         return $this;
     }
 
-    protected function translation_locale(){
+    protected function translation_locale()
+    {
         return $this->locale ?: \App::getLocale();
     }
 
-    protected function translation_fallback(){
+    protected function translation_fallback()
+    {
         return $this->fallback_locale ?: \Config::get('app.fallback_locale');
     }
 
     //---------------[ eager Loading ]------------------
 
-    private function rebuildModelFromQuery($model){
+    private function rebuildModelFromQuery($model)
+    {
 
         // Recontsruct the Translation object
         $translation = new Translation([
@@ -74,43 +84,43 @@ trait TranslationTrait{
             unset($model->original[$key]);
         }
 
-        return $model;        
+        return $model;
     }
 
-    public function scopeFirstWithTranslation($query, $key = null,$locale = null) {
-        
+    public function scopeFirstWithTranslation($query, $key = null, $locale = null)
+    {
         $locale = $locale ?: $this->translation_locale();
         $key = $key ?: reset(static::$translatable);
 
-        // Join model with translations to reduce queries
-        $model = $query->leftJoin('translations', function ($join) use ($key, $locale) {
-            $join->on($this->getTable().".$key", '=', 'translations.group_id')
-                 ->on('translations.locale' , '=', $locale);
-        })->first([
-            $this->getTable().'.*',
-            'translations.id as tr_id',
-            'translations.value as tr_value',
-            'translations.locale as tr_locale',
-            'translations.group_id as tr_group_id',
-        ]);
+        $model = $query->leftJoin('translations', $this->getTable().".$key", '=', 'translations.group_id')
+            ->where('translations.locale', '=', $locale)
+            ->first([
+                $this->getTable().'.*',
+                'translations.id as tr_id',
+                'translations.value as tr_value',
+                'translations.locale as tr_locale',
+                'translations.group_id as tr_group_id',
+            ]);
+
 
         $model = $this->rebuildModelFromQuery($model);
 
         return $model;
     }
 
-    public function scopeFindWithTranslation($query, $id, $key = null, $locale = null) {
+    public function scopeFindWithTranslation($query, $id, $key = null, $locale = null)
+    {
         return $query->where($this->getTable().'.id', '=', $id)->firstWithTranslation($key, $locale);
     }
 
-    public function scopeGetWithTranslation($query, $key = null,$locale = null) {
-        
+    public function scopeGetWithTranslation($query, $key = null, $locale = null)
+    {
         $locale = $locale ?: $this->translation_locale();
         $key = $key ?: reset(static::$translatable);
 
         // Join model with translations to reduce queries
         $models = $query->leftJoin('translations', $this->getTable().".$key", '=', 'translations.group_id')
-            ->where('translations.locale' , '=', $locale)
+            ->where('translations.locale', '=', $locale)
             ->get([
                 $this->getTable().'.*',
                 'translations.id as tr_id',
@@ -126,7 +136,8 @@ trait TranslationTrait{
         return new Collection($items);
     }
 
-    public function scopeAllWithTranslation($query, $key = null, $locale = null) {
+    public function scopeAllWithTranslation($query, $key = null, $locale = null)
+    {
         return $query->getWithTranslation($key, $locale);
     }
 
@@ -134,10 +145,11 @@ trait TranslationTrait{
 
     protected $translatable_handled;
 
-    protected function translatable_get($key){
+    protected function translatable_get($key)
+    {
         $this->translatable_handled=false;
 
-        if(self::isTranslatable($key)){
+        if (self::isTranslatable($key)) {
             $this->translatable_handled=true;
             $translations = $this->translations($key);
             $result = $translations->in($this->translation_locale(), $this->translation_fallback());
@@ -146,14 +158,15 @@ trait TranslationTrait{
         }
     }
 
-    protected function translatable_set($key, $value){
+    protected function translatable_set($key, $value)
+    {
         $this->translatable_handled=false;
 
-        if(self::isTranslatable($key)){
+        if (self::isTranslatable($key)) {
             $translations = $this->translations($key);
-            if (is_array($value)){
+            if (is_array($value)) {
                 $translations->set($value);
-            } else {            
+            } else {
                 $translations->set($this->translation_locale(), $value);
             }
             $this->attributes[$key] = $translations->group_id;
@@ -164,31 +177,36 @@ trait TranslationTrait{
 
     //--- copy these in your model if you need to implement __get() __set() methods
 
-    public function __get($key) {
+    public function __get($key)
+    {
         // Handle Translatable keys
         $result=$this->translatable_get($key);
-        if ($this->translatable_handled)
+        if ($this->translatable_handled) {
             return $result;
+        }
 
         //your code goes here
-        
+
         return parent::__get($key);
     }
 
-    public function __set($key, $value) {
+    public function __set($key, $value)
+    {
         // Handle Translatable keys
         $this->translatable_set($key, $value);
-        if ($this->translatable_handled)
+        if ($this->translatable_handled) {
             return;
+        }
 
         //your code goes here
 
         parent::__set($key, $value);
-    } 
+    }
 
     //-------------------------------------------------
 
-    public function __isset($key) {
+    public function __isset($key)
+    {
         return (self::isTranslatable($key)  || parent::__isset($key));
     }
 
@@ -196,19 +214,20 @@ trait TranslationTrait{
     {
         $translations = [];
         foreach ($attributes as $key => $value) {
-            if(self::isTranslatable($key)) {
+            if (self::isTranslatable($key)) {
                 $translations[$key] = $value;
                 unset($attributes[$key]);
             }
         }
         $model = new static($attributes);
-        
+
         // Replace empty with Dummy translations
-        foreach (self::$translatable as $key){
-            if(!isset($translations[$key]) || $translations[$key]==[])
+        foreach (self::$translatable as $key) {
+            if (!isset($translations[$key]) || $translations[$key]==[]) {
                 $translations[$key] = [
                     'xx' => '', // Dummy
                 ];
+            }
         }
 
         foreach ($translations as $key => $value) {
@@ -223,7 +242,7 @@ trait TranslationTrait{
     {
         $translations = [];
         foreach ($attributes as $key => $value) {
-            if(self::isTranslatable($key)) {
+            if (self::isTranslatable($key)) {
                 $translations[$key] = $value;
                 unset($attributes[$key]);
             }
@@ -241,9 +260,8 @@ trait TranslationTrait{
     {
         self::deleting(function ($model) {
             foreach (static::$translatable as $key) {
-                Translation::where('group_id',$model->attributes[$key])->delete();
+                Translation::where('group_id', $model->attributes[$key])->delete();
             }
         });
     }
-
 }

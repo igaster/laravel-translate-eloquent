@@ -1,13 +1,15 @@
 <?php
 
-abstract class abstractTest extends \Orchestra\Testbench\TestCase {
+abstract class abstractTest extends \Orchestra\Testbench\TestCase
+{
 
 
     // -----------------------------------------------
     //  Global Setup (Run once)
     // -----------------------------------------------
 
-    public static function setUpBeforeClass() {
+    public static function setUpBeforeClass()
+    {
         parent::setUpBeforeClass();
         
         if (file_exists(__DIR__.'/../.env')) {
@@ -20,7 +22,8 @@ abstract class abstractTest extends \Orchestra\Testbench\TestCase {
     //   Set Laravel App Configuration
     // -----------------------------------------------
 
-    protected function getEnvironmentSetUp($app) {
+    protected function getEnvironmentSetUp($app)
+    {
         $app['config']->set('database.default', 'testing'); // sqlite , memory
     }
 
@@ -28,14 +31,16 @@ abstract class abstractTest extends \Orchestra\Testbench\TestCase {
     //   add Service Providers & Facades
     // -----------------------------------------------
 
-    protected function getPackageProviders($app) {
+    protected function getPackageProviders($app)
+    {
         return [
             // Intervention\Image\ImageServiceProvider::class,
         ];
     }
 
 
-    protected function getPackageAliases($app) {
+    protected function getPackageAliases($app)
+    {
         return [
             // 'Image' => Intervention\Image\Facades\Photo::class,
         ];
@@ -45,7 +50,8 @@ abstract class abstractTest extends \Orchestra\Testbench\TestCase {
     //  Helpers
     // -----------------------------------------------
 
-    public function reloadModel(&$model){
+    public function reloadModel(&$model)
+    {
         $className = get_class($model);
         $model = $className::find($model->id);
         return $model;
@@ -57,11 +63,14 @@ abstract class abstractTest extends \Orchestra\Testbench\TestCase {
 
     protected function seeInDatabase($table, array $data, $connection = null)
     {
-
         $count = DB::table($table)->where($data)->count();
         
         $this->assertGreaterThan(0, $count, sprintf(
-            'Unable to find row in database table [%s] that matched attributes [%s].', $table, json_encode($data)
+            'Unable to find row in database table [%s] that matched attributes [%s].',
+        
+            $table,
+        
+            json_encode($data)
         ));
 
         return $this;
@@ -72,10 +81,13 @@ abstract class abstractTest extends \Orchestra\Testbench\TestCase {
         $count = DB::table($table)->where($data)->count();
         
         $this->assertEquals(0, $count, sprintf(
-            'Found unexpected records in database table [%s] that matched attributes [%s].', $table, json_encode($data)
+            'Found unexpected records in database table [%s] that matched attributes [%s].',
+        
+            $table,
+        
+            json_encode($data)
         ));
 
         return $this;
     }
-
 }
