@@ -182,9 +182,7 @@ Notes:
 
 Please notice that using a sinle Table for all trasnlations is not the optimal architecture when consindering database performance. Each translation requires one seperate query to the database. If performance is an issue you can check alternative implementations like [dimsav/laravel-translatable](https://github.com/dimsav/laravel-translatable)
 
-## Handle Conflicts:
-
-#### 1. __get() & __set()
+## Handle __get() & __set() Conflicts:
 
 This Trait makes use of the `__get()` and `__set()` magic methods to perform its ... well... magic! However if you want to implement these functions in your model or another trait then php will complain about conflicts. To overcome this problem you have to hide the Traits methods when you import it:
 
@@ -222,28 +220,6 @@ public function __set($key, $value) {
     parent::__set($key, $value);
 } 
 ```
-
-#### 2. boot(), create(), update() methods
-
-This trait implements the `boot()` method to handle cascaded deletes of the translations. If you should implemeent `boot()` in your model then [rename the method](http://php.net/manual/en/language.oop5.traits.php) when you import the trait:
-
-```php
-use igaster\TranslateEloquent\TranslationTrait {
-    boot as bootTranslations;
-}
-```
-
-and call it in your own boot method:
-
-```php
-public static function boot()
-{
-    // your code goes here
-    self::bootTranslations();
-}
-```
-
-The same aproach can be followed if you need to override Eloquent's `create()` or `update()` methods, which are overriden in the Trait.
 
 ## Todo
 * ~~Cascade delete model + translations~~ Fixed
