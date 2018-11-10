@@ -9,7 +9,6 @@ class Translation extends Model
     public $timestamps = false;
 
 
-
     public function delete()
     {
         parent::delete();
@@ -17,9 +16,9 @@ class Translation extends Model
         if ($this->locale !== 'xx') {
             if (!Translation::where('group_id', $this->group_id)->exists()) {
                 Translation::create([
-                    'group_id'	=> $this->group_id,
-                    'locale'	=> 'xx',
-                    'value'		=> '',
+                    'group_id' => $this->group_id,
+                    'locale'   => 'xx',
+                    'value'    => '',
                 ]);
             }
         }

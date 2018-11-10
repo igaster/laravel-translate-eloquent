@@ -41,6 +41,7 @@ trait TranslationTrait
 
     protected $locale = null;
     protected $fallback_locale = null;
+
     public function translate($locale, $fallback_locale = null)
     {
         $this->locale = $locale;
@@ -62,17 +63,16 @@ trait TranslationTrait
 
     private function rebuildModelFromQuery($model)
     {
-
-        // Recontsruct the Translation object
+        // Reconstruct the Translation object
         $translation = new Translation([
-            'id'        => $model->tr_id,
-            'value'     => $model->tr_value,
-            'locale'    => $model->tr_locale,
-            'group_id'  => $model->tr_group_id,
+            'id'       => $model->tr_id,
+            'value'    => $model->tr_value,
+            'locale'   => $model->tr_locale,
+            'group_id' => $model->tr_group_id,
         ]);
         $translation->exists = true;
 
-        // Atatch the Translation to the Model
+        // Attach the Translation to the Model
         $group_id = $model->tr_group_id;
         $translations = new Translations($group_id);
         $translations->attach($translation);
@@ -92,10 +92,10 @@ trait TranslationTrait
         $locale = $locale ?: $this->translation_locale();
         $key = $key ?: reset(static::$translatable);
 
-        $model = $query->leftJoin('translations', $this->getTable().".$key", '=', 'translations.group_id')
+        $model = $query->leftJoin('translations', $this->getTable() . ".$key", '=', 'translations.group_id')
             ->where('translations.locale', '=', $locale)
             ->first([
-                $this->getTable().'.*',
+                $this->getTable() . '.*',
                 'translations.id as tr_id',
                 'translations.value as tr_value',
                 'translations.locale as tr_locale',
@@ -110,7 +110,7 @@ trait TranslationTrait
 
     public function scopeFindWithTranslation($query, $id, $key = null, $locale = null)
     {
-        return $query->where($this->getTable().'.id', '=', $id)->firstWithTranslation($key, $locale);
+        return $query->where($this->getTable() . '.id', '=', $id)->firstWithTranslation($key, $locale);
     }
 
     public function scopeGetWithTranslation($query, $key = null, $locale = null)
@@ -119,10 +119,10 @@ trait TranslationTrait
         $key = $key ?: reset(static::$translatable);
 
         // Join model with translations to reduce queries
-        $models = $query->leftJoin('translations', $this->getTable().".$key", '=', 'translations.group_id')
+        $models = $query->leftJoin('translations', $this->getTable() . ".$key", '=', 'translations.group_id')
             ->where('translations.locale', '=', $locale)
             ->get([
-                $this->getTable().'.*',
+                $this->getTable() . '.*',
                 'translations.id as tr_id',
                 'translations.value as tr_value',
                 'translations.locale as tr_locale',
@@ -141,16 +141,36 @@ trait TranslationTrait
         return $query->getWithTranslation($key, $locale);
     }
 
+    // ArrayAccess interface
+
+    public function offsetSet($key, $value)
+    {
+        if (self::isTranslatable($key)) {
+            $this->$key = $value;
+        } else {
+            parent::offsetSet($key, $value);
+        }
+    }
+
+    public function offsetGet($key)
+    {
+        if (self::isTranslatable($key)) {
+            return $this->$key;
+        } else {
+            return parent::offsetGet($key);
+        }
+    }
+
     //-------------------------------------------------
 
     protected $translatable_handled;
 
     protected function translatable_get($key)
     {
-        $this->translatable_handled=false;
+        $this->translatable_handled = false;
 
         if (self::isTranslatable($key)) {
-            $this->translatable_handled=true;
+            $this->translatable_handled = true;
             $translations = $this->translations($key);
             $result = $translations->in($this->translation_locale(), $this->translation_fallback());
             $this->translate(null, null);
@@ -160,7 +180,7 @@ trait TranslationTrait
 
     protected function translatable_set($key, $value)
     {
-        $this->translatable_handled=false;
+        $this->translatable_handled = false;
 
         if (self::isTranslatable($key)) {
             $translations = $this->translations($key);
@@ -171,7 +191,7 @@ trait TranslationTrait
             }
             $this->attributes[$key] = $translations->group_id;
             $this->translate(null, null);
-            $this->translatable_handled=true;
+            $this->translatable_handled = true;
         }
     }
 
@@ -180,7 +200,7 @@ trait TranslationTrait
     public function __get($key)
     {
         // Handle Translatable keys
-        $result=$this->translatable_get($key);
+        $result = $this->translatable_get($key);
         if ($this->translatable_handled) {
             return $result;
         }
@@ -207,8 +227,10 @@ trait TranslationTrait
 
     public function __isset($key)
     {
-        return (self::isTranslatable($key)  || parent::__isset($key));
+        return (self::isTranslatable($key) || parent::__isset($key));
     }
+
+    // Extend basic Eloquent methods
 
     public static function create(array $attributes = [])
     {
@@ -223,7 +245,7 @@ trait TranslationTrait
 
         // Replace empty with Dummy translations
         foreach (self::$translatable as $key) {
-            if (!isset($translations[$key]) || $translations[$key]==[]) {
+            if (!isset($translations[$key]) || $translations[$key] == []) {
                 $translations[$key] = [
                     'xx' => '', // Dummy
                 ];
@@ -256,7 +278,8 @@ trait TranslationTrait
         return $this;
     }
 
-    public static function boot()
+    // Boot trait
+    public static function bootTranslationTrait()
     {
         self::deleting(function ($model) {
             foreach (static::$translatable as $key) {

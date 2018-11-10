@@ -30,9 +30,9 @@ class Translations
         return !empty($result);
     }
 
-    public function set($locale, $value=null)
+    public function set($locale, $value = null)
     {
-        
+
         // Array format passed
         if (is_array($locale)) {
             foreach ($locale as $loc => $value) {
@@ -44,17 +44,17 @@ class Translations
         // Update an existing translation
         if ($this->has($locale)) {
             $this->get($locale)->update([
-                'value'		=> $value,
+                'value' => $value,
             ]);
         } else { // Create new translation
-            $this->translations[$locale]=Translation::create([
-                'group_id'	=> $this->group_id,
-                'value'		=> $value,
-                'locale'	=> $locale,
+            $this->translations[$locale] = Translation::create([
+                'group_id' => $this->group_id,
+                'value'    => $value,
+                'locale'   => $locale,
             ]);
         }
 
-        if ($locale !=='xx' && $dummy = $this->get('xx')) {
+        if ($locale !== 'xx' && $dummy = $this->get('xx')) {
             $dummy->delete();
         }
     }
@@ -71,7 +71,7 @@ class Translations
         if ($this->has($locale)) {
             return $this->get($locale)->value;
         }
-        
+
         if ($fallback) {
             return $this->in($fallback);
         }

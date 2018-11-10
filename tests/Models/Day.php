@@ -1,10 +1,12 @@
 <?php namespace igaster\TranslateEloquent\Tests\Models;
 
+use igaster\TranslateEloquent\TranslationTrait;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 
 class Day extends Eloquent
 {
-    use \igaster\TranslateEloquent\TranslationTrait;
+    use TranslationTrait;
+
     protected $guarded = [];
     protected $table = 'days';
 
