@@ -1,6 +1,5 @@
 <?php
 
-use igaster\TranslateEloquent\Translatable;
 use igaster\TranslateEloquent\Translations;
 use igaster\TranslateEloquent\Translation;
 use igaster\TranslateEloquent\Exceptions\KeyNotTranslatable;
@@ -8,7 +7,7 @@ use igaster\TranslateEloquent\Exceptions\TranslationNotFound;
 
 use igaster\TranslateEloquent\Tests\Models\Day;
 
-class TranslationTest extends abstractTest
+class TranslationTest extends \abstractTest
 {
 
 

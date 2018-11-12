@@ -2,7 +2,7 @@
 
 use igaster\TranslateEloquent\Tests\App\TestModel;
 
-class TestCase extends abstractTest
+class TestCase extends \abstractTest
 {
 
     // -----------------------------------------------
