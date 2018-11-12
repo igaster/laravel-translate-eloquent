@@ -1,8 +1,11 @@
 <?php
 
-use igaster\TranslateEloquent\Tests\App\TestModel;
+namespace igaster\TranslateEloquent\Tests;
 
-class TestCase extends \abstractTest
+use igaster\TranslateEloquent\Tests\App\TestModel;
+use Illuminate\Support\Facades\Schema;
+
+class TestCase extends abstractTest
 {
 
     // -----------------------------------------------

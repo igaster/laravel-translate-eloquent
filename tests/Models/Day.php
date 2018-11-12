@@ -1,4 +1,6 @@
-<?php namespace igaster\TranslateEloquent\Tests\Models;
+<?php
+
+namespace igaster\TranslateEloquent\Tests\Models;
 
 use igaster\TranslateEloquent\TranslationTrait;
 use Illuminate\Database\Eloquent\Model as Eloquent;

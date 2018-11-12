@@ -1,13 +1,18 @@
 <?php
 
+namespace igaster\TranslateEloquent\Tests;
+
 use igaster\TranslateEloquent\Translations;
 use igaster\TranslateEloquent\Translation;
 use igaster\TranslateEloquent\Exceptions\KeyNotTranslatable;
 use igaster\TranslateEloquent\Exceptions\TranslationNotFound;
 
 use igaster\TranslateEloquent\Tests\Models\Day;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Schema;
 
-class TranslationTest extends \abstractTest
+class TranslationTest extends abstractTest
 {
 
 
@@ -20,14 +25,14 @@ class TranslationTest extends \abstractTest
         parent::setUp();
 
         // -- Set  migrations
-        \Schema::create('translations', function ($table) {
+        Schema::create('translations', function ($table) {
             $table->increments('id');
             $table->string('group_id');
             $table->string('value');
             $table->string('locale', 2); // Can be any lenght!
         });
 
-        \Schema::create('days', function ($table) {
+        Schema::create('days', function ($table) {
             $table->increments('id');
             $table->integer('name')->unsigned()->nullable();
             $table->boolean('weekend')->default(false);
@@ -37,8 +42,8 @@ class TranslationTest extends \abstractTest
 
     public function tearDown()
     {
-        \Schema::drop('days');
-        \Schema::drop('translations');
+        Schema::drop('days');
+        Schema::drop('translations');
     }
 
     // -----------------------------------------------
@@ -57,8 +62,8 @@ class TranslationTest extends \abstractTest
 
     private function set_locale($locale, $fallback_locale)
     {
-        \App::setLocale($locale);
-        \Config::set('app.fallback_locale', $fallback_locale);
+        App::setLocale($locale);
+        Config::set('app.fallback_locale', $fallback_locale);
     }
 
     public function test_Translations_collection()
@@ -110,7 +115,7 @@ class TranslationTest extends \abstractTest
         $model = $this->getNewModel();
 
         // Create
-        \App::setLocale('el');
+        App::setLocale('el');
         $model->name = 'Τρίτη';
         $model->save();
         $this->reloadModel($model);
@@ -121,7 +126,7 @@ class TranslationTest extends \abstractTest
         $this->assertEquals($model->name, 'Τετάρτη');
 
         // 2nd locale
-        \App::setLocale('en');
+        App::setLocale('en');
         $model->name = 'Wednesday';
         $this->assertEquals($model->name, 'Wednesday');
     }
@@ -179,7 +184,7 @@ class TranslationTest extends \abstractTest
         $this->assertEquals($model->translations('name')->in('en'), 'Monday');
         $this->assertEquals($model->translations('name')->in('invalid', 'el'), 'Δευτέρα');
 
-        \App::setLocale('el');
+        App::setLocale('el');
         $this->assertEquals($model->name, 'Δευτέρα');
 
         // $this->expectException(TranslationNotFound::class);
@@ -191,7 +196,7 @@ class TranslationTest extends \abstractTest
     public function test_get_key_array_access()
     {
         $model = $this->getNewModel();
-        \App::setLocale('el');
+        App::setLocale('el');
 
         // get
         $model->name= 'Δευτέρα';
@@ -263,7 +268,7 @@ class TranslationTest extends \abstractTest
 
     public function test_model_create_single_translation()
     {
-        \App::setLocale('el');
+        App::setLocale('el');
         $model = Day::create([
             'weekend' => true,
             'name' => 'Πέμπτη',
@@ -337,7 +342,7 @@ class TranslationTest extends \abstractTest
 
     public function test_del_all_translations()
     {
-        \App::setLocale('en');
+        App::setLocale('en');
         $day1 = Day::create(['name' => 'Monday']);
         $this->notSeeInDatabase('translations', ['locale' => 'xx']);
 
@@ -404,7 +409,7 @@ class TranslationTest extends \abstractTest
         $this->assertEquals($day1->translate('en')->name, 'Wednesday');
         $this->assertEquals(false, $day1->weekend);
 
-        \App::setLocale('el');
+        App::setLocale('el');
         $day1->update([
             'weekend' => true,
             'name' => 'Πέμπτη',
@@ -451,7 +456,7 @@ class TranslationTest extends \abstractTest
     public function test_eager_load_translation_first()
     {
         $this->createTwoDays();
-        \App::setLocale('el');
+        App::setLocale('el');
         $model = Day::where('weekend', true)->firstWithTranslation('name');
         $this->assertEquals('Κυριακή', $model->name);
     }
@@ -459,7 +464,7 @@ class TranslationTest extends \abstractTest
     public function test_eager_load_translation_find()
     {
         $this->createTwoDays();
-        \App::setLocale('el');
+        App::setLocale('el');
         $model = Day::findWithTranslation(1, 'name');
         $this->assertEquals('Τετάρτη', $model->name);
 
@@ -470,7 +475,7 @@ class TranslationTest extends \abstractTest
     public function test_eager_load_translation_get()
     {
         $this->createTwoDays();
-        \App::setLocale('el');
+        App::setLocale('el');
         $collection = Day::orderBy('id')->getWithTranslation('name');
         $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $collection);
         $this->assertEquals(2, $collection->count());
@@ -481,7 +486,7 @@ class TranslationTest extends \abstractTest
     public function test_eager_load_translation_all()
     {
         $this->createTwoDays();
-        \App::setLocale('el');
+        App::setLocale('el');
         $collection = Day::orderBy('id')->allWithTranslation();
         $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $collection);
         $this->assertEquals(2, $collection->count());

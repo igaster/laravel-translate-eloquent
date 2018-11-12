@@ -1,5 +1,9 @@
 <?php
 
+namespace igaster\TranslateEloquent\Tests;
+
+use Illuminate\Support\Facades\DB;
+
 abstract class abstractTest extends \Orchestra\Testbench\TestCase
 {
 
