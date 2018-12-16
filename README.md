@@ -5,7 +5,7 @@
 [![Build Status](https://img.shields.io/travis/igaster/laravel-translate-eloquent.svg)](https://travis-ci.org/igaster/laravel-translate-eloquent)
 [![Codecov](https://img.shields.io/codecov/c/github/igaster/laravel-translate-eloquent.svg)](https://codecov.io/github/igaster/laravel-translate-eloquent)
 
-Translate any column in your Database in Laravel models. You need only one additional table to strore translations for all your models.
+Translate any column in your Database in Laravel models. You need only one additional table to store translations for all your models.
 
 ## Installation
 
@@ -68,7 +68,7 @@ Now you are ready to use translated keys!
 
 ## Usage
 
-When you access a translatable key, then it's translation will be retrieved in the application's current locale. If no translation is defined then the Laravel's 'app.fallback_locale' will be used. If neither translation is found then an an empty string will be returned. So simpe!
+When you access a translatable key, then it's translation will be retrieved in the application's current locale. If no translation is defined then the Laravel's 'app.fallback_locale' will be used. If neither translation is found then an empty string will be returned. So simple!
 
 ### Work with translations:
 
@@ -91,7 +91,7 @@ $model->key = [                          // Set a batch of translations
 Important notes:
 
 * When you create a new translation for the first time, you must save your model to persist the relationship: `$model->save();`. This is not necessary when updating a translation or adding a new locale.
-* When you set a value for a translation then an entry in the the `translations` table will be created / updated.
+* When you set a value for a translation then an entry in the `translations` table will be created / updated.
 
 ### Create/Update translated models:
 
@@ -150,7 +150,7 @@ $translations = new Translations();          // Create a new Translations collec
 $translations = new Translations($group_id); // or load Translations with $group_id
 $translations->group_id;  // column `translations.group_id` groups all translations for a key
 
-$translation = $translations->get('en');  // Get instance of `Translation` (a single translations)
+$translation = $translations->get('en');  // Get instance of `Translation` (a single translation)
 $translation->id;                   // From this model you have access to the actual translations record
 $translation->value='New Value';    // in your database. You can perform any raw opperation on it.
 ```
@@ -170,17 +170,17 @@ Day::firstWithTranslation('name', 'en');    // First Day from the query with 'na
 
 // The column name is optional and defaults to first item in your `$translatable` array:
 Day::firstWithTranslation();    // First Day from the query with the first $translatable column (='name') 
-                                // translated in in the current Locale
+                                // translated in the current Locale
 ```
 
 Notes:
 * The above query scopes should be used as an endpoint of your queries as they will return either a Model or a Collection
-* Eager loading is designed do reduce to a signle query the read operations when you are retrieving a model from the Database. It uses a JOIN statement and not two subsequent queries as opposed to Eloquent eager loading. One limitation of this implementation is that you can only request the translation of a signle field. 
-* If your models have multiple keys that should be translated then all the subsequent read opperations will result to an extra query.
+* Eager loading is designed to reduce to a single query the read operations when you are retrieving a model from the Database. It uses a JOIN statement and not two subsequent queries as opposed to Eloquent eager loading. One limitation of this implementation is that you can only request the translation of a single field. 
+* If your models have multiple keys that should be translated then all the subsequent read operations will result in an extra query.
 
 ## Performance considerations:
 
-Please notice that using a sinle Table for all trasnlations is not the optimal architecture when consindering database performance. Each translation requires one seperate query to the database. If performance is an issue you can check alternative implementations like [dimsav/laravel-translatable](https://github.com/dimsav/laravel-translatable)
+Please notice that using a single Table for all translations is not the optimal architecture when considering database performance. Each translation requires one seperate query to the database. If performance is an issue you can check alternative implementations like [dimsav/laravel-translatable](https://github.com/dimsav/laravel-translatable)
 
 ## Handle __get() & __set() Conflicts:
 
@@ -193,7 +193,7 @@ use igaster\TranslateEloquent\TranslationTrait {
 }
 ```
 
-and call them manually from your `__get()` / `__set()` mehods:
+and call them manually from your `__get()` / `__set()` methods:
 
 ```php
 //--- copy these in your model if you need to implement __get() __set() methods
