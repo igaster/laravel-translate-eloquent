@@ -20,7 +20,7 @@ class TranslationTest extends abstractTest
     //  Setup Database (Run before each Test)
     // -----------------------------------------------
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -40,7 +40,7 @@ class TranslationTest extends abstractTest
         });
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         Schema::drop('days');
         Schema::drop('translations');

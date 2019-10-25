@@ -1,5 +1,5 @@
 ## Description
-[![Laravel](https://img.shields.io/badge/Laravel-5.x-orange.svg)](http://laravel.com)
+[![Laravel](https://img.shields.io/badge/Laravel-orange.svg)](http://laravel.com)
 [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg)](https://tldrlegal.com/license/mit-license)
 [![Downloads](https://img.shields.io/packagist/dt/igaster/laravel-translate-eloquent.svg)](https://packagist.org/packages/igaster/laravel-translate-eloquent)
 [![Build Status](https://img.shields.io/travis/igaster/laravel-translate-eloquent.svg)](https://travis-ci.org/igaster/laravel-translate-eloquent)
