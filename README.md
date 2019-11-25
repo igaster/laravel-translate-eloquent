@@ -51,6 +51,27 @@ In your migrations define any number of integer keys that you want to hold trans
     $table->integer('key')->unsigned()->nullable();
 ```
 
+### Step 2.1: Modifying existing model fields
+
+Define migrations to simply modify your existing models to use translations and migrate all existing data to newly created table.
+
+```php
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use igaster\TranslateEloquent\MigrationTrait;
+
+class AddTranslationToMyTable extends Migration
+{
+    use MigrationTrait;
+
+    public $table = 'my_table';
+    public $fields = ['key1', 'key2'];
+
+    public $model = App\MyModel::class;
+}
+```
+
 ### Step 3: Setup your model:
 
 Apply the `TranslationTrait` trait to any model that you want to have translatable keys and add these keys into the `$translatable` array:
